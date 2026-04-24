@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-const Color _primaryColor = Color(0xFF9080FF);
-const Color _secondaryColor = Color(0xFF86EFAC);
+const Color _primaryColor = Color(0xFFF05A28); // Brand Orange
+const Color _secondaryColor = Color(0xFFE2E8F0); // Light Gray
 const Color _bgDarkColor = Color(0xFF101014); // Very dark gray, almost black
 const Color _surfaceDarkColor = Color(0xFF1E1E24);
-const Color _bgLightColor = Color(0xFFF3F4F6);
-const Color _surfaceLightColor = Color(0xFFFFFFFF);
+const Color _bgLightColor = Color(0xFFF5F5F5); // Light Gray Background
+const Color _surfaceLightColor = Color(0xFFFFFFFF); // White Surface
 
-final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.dark);
+final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
 
 class AppTheme {
   static ThemeData get lightTheme {

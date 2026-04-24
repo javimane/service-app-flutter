@@ -5,6 +5,10 @@ import '../../features/home/presentation/main_scaffold.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/reels/presentation/reels_screen.dart';
 import '../../features/profile/presentation/specialist_profile_screen.dart';
+import '../../features/categories/presentation/categories_screen.dart';
+import '../../features/services/presentation/services_screen.dart';
+import '../../features/products/presentation/products_screen.dart';
+import '../../features/dashboard/presentation/dashboard_main_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/login',
@@ -35,6 +39,22 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/specialist',
       builder: (context, state) => const SpecialistProfileScreen(),
+    ),
+    GoRoute(
+      path: '/categories',
+      builder: (context, state) => const CategoriesScreen(),
+    ),
+    GoRoute(
+      path: '/services',
+      builder: (context, state) => const ServicesScreen(),
+    ),
+    GoRoute(
+      path: '/products',
+      builder: (context, state) => const ProductsScreen(),
+    ),
+    GoRoute(
+      path: '/dashboard',
+      builder: (context, state) => const DashboardMainScreen(),
     ),
   ],
 );

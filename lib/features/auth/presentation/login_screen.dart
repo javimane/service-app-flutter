@@ -13,52 +13,45 @@ class LoginScreen extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: const Icon(Icons.arrow_back),
-        title: const Text('AUTHENTICATION', style: TextStyle(letterSpacing: 1.5, fontSize: 14, fontWeight: FontWeight.bold)),
-        centerTitle: false,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                const Text('V.01', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
-                  onPressed: () {
-                    ref.read(themeModeProvider.notifier).state = 
-                        isDark ? ThemeMode.light : ThemeMode.dark;
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+      // Removed AppBar for a cleaner look
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
+              // Logo Section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.search_rounded, color: theme.colorScheme.primary, size: 40), // Placeholder logo icon
+                  const SizedBox(width: 8),
+                  Text(
+                    'SERCIO',
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 2.0,
+                      color: isDark ? Colors.white : Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 60),
               Text(
-                'Ingresar',
-                style: theme.textTheme.headlineLarge?.copyWith(
+                'Iniciar Sesión',
+                style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  fontSize: 36,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Continúa con tu experiencia\neditorial.',
+                'Ingresa tus credenciales para continuar',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: isDark ? Colors.white70 : Colors.black87,
-                  height: 1.5,
+                  color: isDark ? Colors.white70 : Colors.black54,
                 ),
               ),
-              const SizedBox(height: 48),
+              const SizedBox(height: 32),
               const CustomTextField(
                 label: 'CORREO ELECTRÓNICO',
                 hint: 'nombre@ejemplo.com',
@@ -196,9 +189,9 @@ class LoginScreen extends ConsumerWidget {
                   TextButton(
                     onPressed: () => context.push('/register'),
                     child: Text(
-                      'CREAR REGISTRO',
+                      'REGÍSTRATE',
                       style: TextStyle(
-                        color: theme.colorScheme.secondary,
+                        color: theme.colorScheme.primary,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
