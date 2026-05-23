@@ -1,12 +1,23 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+String _getBaseUrl() {
+  if (kIsWeb) return 'http://localhost:3000/api';
+  if (Platform.isAndroid) return 'http://10.0.2.2:3000/api';
+  if (Platform.isIOS) return 'http://localhost:3000/api';
+  // Fallback: replace with your machine IP when testing on a physical device
+  return 'http://<TU_IP_LOCAL>:3000/api';
+}
 
 class ApiClient {
   late final Dio _dio;
 
   ApiClient() {
     _dio = Dio(BaseOptions(
-      baseUrl: 'http://10.0.2.2:3000/api', // Adjust base URL for local testing (Android emulator 10.0.2.2, iOS localhost)
+      baseUrl:
+          _getBaseUrl(), // Base URL chosen by platform (emulator/device/web)
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
       headers: {
@@ -33,7 +44,8 @@ class ApiClient {
   Dio get dio => _dio;
 
   // Simple GET wrapper
-  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) async {
+  Future<Response> get(String path,
+      {Map<String, dynamic>? queryParameters}) async {
     try {
       return await _dio.get(path, queryParameters: queryParameters);
     } catch (e) {
@@ -67,4 +79,23 @@ class ApiClient {
       rethrow;
     }
   }
+
+  // ...existing code...
+  // Añadir esto dentro de la clase ApiClient
+  Future<dynamic> patch(String path,
+      {dynamic data,
+      Map<String, dynamic>? queryParameters,
+      Options? options,
+      CancelToken? cancelToken,
+      ProgressCallback? onSendProgress,
+      ProgressCallback? onReceiveProgress}) async {
+    return await _dio.patch(path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+        cancelToken: cancelToken,
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress);
+  }
+// ...existing code...
 }

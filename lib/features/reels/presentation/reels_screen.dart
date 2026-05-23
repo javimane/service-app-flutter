@@ -116,12 +116,12 @@ class _ReelVideoPlayerState extends State<_ReelVideoPlayer> {
           ),
         ),
         // Overlay UI on top of Reel
-        Positioned(
+        const Positioned(
           bottom: 40,
           left: 16,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               Text('@profesional_pro', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
               SizedBox(height: 8),
               Text('Mira mi último trabajo. #remodelación', style: TextStyle(color: Colors.white)),

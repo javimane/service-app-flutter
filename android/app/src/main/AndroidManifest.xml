@@ -1,4 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Permisos añadidos: ubicación, notificaciones y acceso a almacenamiento para subida de archivos -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Android 13+ requiere POST_NOTIFICATIONS -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Lectura de almacenamiento para subir archivos (en Android 13+ prefer usar Media permissions) -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- WRITE_EXTERNAL_STORAGE está obsoleto en SDK 29+, se limita con maxSdkVersion -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <!-- Cámara por si se permite subir fotos tomadas con la cámara -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:label="service_app_flutter"
         android:name="${applicationName}"

@@ -86,12 +86,12 @@ class SpecialistProfileScreen extends StatelessWidget {
               style: TextStyle(color: isDark ? Colors.white70 : Colors.black87, height: 1.5),
             ),
             const SizedBox(height: 24),
-            Row(
+            const Row(
               children: [
                 Expanded(child: _StatCard(icon: Icons.star, value: '4.9', label: 'CALIFICACIÓN')),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(child: _StatCard(icon: Icons.check_circle_outline, value: '128', label: 'TRABAJOS', isCenter: true)),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 Expanded(child: _StatCard(icon: Icons.access_time, value: '8a', label: 'EXP.')),
               ],
             ),
@@ -110,7 +110,7 @@ class SpecialistProfileScreen extends StatelessWidget {
               crossAxisCount: 2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
-              children: [
+              children: const [
                 _PortfolioImage('https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80', isTopLeftCurved: true),
                 _PortfolioImage('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80', isTopRightCurved: true),
                 _PortfolioImage('https://images.unsplash.com/photo-1600566753086-00f18efc2291?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80', isBottomLeftCurved: true),
@@ -120,13 +120,13 @@ class SpecialistProfileScreen extends StatelessWidget {
             const SizedBox(height: 32),
             Text('TESTIMONIOS', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 16),
-            _TestimonialCard(
+            const _TestimonialCard(
               name: 'Elena Rossi',
               image: 'https://i.pravatar.cc/100?img=5',
               text: '«Julian transformó nuestro loft en una obra maestra. Su ojo para el detalle y la forma en que maneja la luz es simplemente incomparable.»',
             ),
             const SizedBox(height: 16),
-            _TestimonialCard(
+            const _TestimonialCard(
               name: 'Marco Chen',
               image: 'https://i.pravatar.cc/100?img=12',
               text: '«Altamente profesional y con una visión futurista. Recomendación 10/10 para cualquier proyecto de alta gama.»',
@@ -136,9 +136,9 @@ class SpecialistProfileScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {},
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Text('SOLICITAR SERVICIO'),
                     SizedBox(width: 8),
                     Icon(Icons.bolt),

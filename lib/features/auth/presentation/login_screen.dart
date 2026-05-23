@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../core/theme/app_theme.dart';
+// removed unused app_theme import
 import 'widgets/custom_text_field.dart';
 
 class LoginScreen extends ConsumerWidget {
@@ -25,7 +25,9 @@ class LoginScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.search_rounded, color: theme.colorScheme.primary, size: 40), // Placeholder logo icon
+                  Icon(Icons.search_rounded,
+                      color: theme.colorScheme.primary,
+                      size: 40), // Placeholder logo icon
                   const SizedBox(width: 8),
                   Text(
                     'SERCIO',
@@ -103,7 +105,8 @@ class LoginScreen extends ConsumerWidget {
                       horizontal: 20,
                       vertical: 18,
                     ),
-                    suffixIcon: Icon(Icons.lock_outline, color: isDark ? Colors.white54 : Colors.black54),
+                    suffixIcon: Icon(Icons.lock_outline,
+                        color: isDark ? Colors.white54 : Colors.black54),
                   ),
                 ),
               ),
@@ -114,7 +117,7 @@ class LoginScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: theme.colorScheme.primary.withOpacity(0.4),
+                      color: theme.colorScheme.primary.withAlpha(102),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -122,9 +125,9 @@ class LoginScreen extends ConsumerWidget {
                 ),
                 child: ElevatedButton(
                   onPressed: () => context.go('/home'),
-                  child: Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Text('INGRESAR'),
                       SizedBox(width: 8),
                       Icon(Icons.chevron_right),
@@ -153,7 +156,8 @@ class LoginScreen extends ConsumerWidget {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         foregroundColor: isDark ? Colors.white : Colors.black,
-                        side: BorderSide(color: isDark ? Colors.white10 : Colors.black12),
+                        side: BorderSide(
+                            color: isDark ? Colors.white10 : Colors.black12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -169,7 +173,8 @@ class LoginScreen extends ConsumerWidget {
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         foregroundColor: isDark ? Colors.white : Colors.black,
-                        side: BorderSide(color: isDark ? Colors.white10 : Colors.black12),
+                        side: BorderSide(
+                            color: isDark ? Colors.white10 : Colors.black12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
@@ -184,7 +189,8 @@ class LoginScreen extends ConsumerWidget {
                 children: [
                   Text(
                     '¿No tienes una cuenta? ',
-                    style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+                    style: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.black87),
                   ),
                   TextButton(
                     onPressed: () => context.push('/register'),
@@ -214,8 +220,10 @@ class LoginScreen extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Icon(Icons.fingerprint, color: theme.colorScheme.primary),
-            Icon(Icons.arrow_forward_rounded, color: isDark ? Colors.white30 : Colors.black38),
-            Icon(Icons.person_add_alt_1, color: isDark ? Colors.white30 : Colors.black38),
+            Icon(Icons.arrow_forward_rounded,
+                color: isDark ? Colors.white30 : Colors.black38),
+            Icon(Icons.person_add_alt_1,
+                color: isDark ? Colors.white30 : Colors.black38),
           ],
         ),
       ),

@@ -85,7 +85,7 @@ class RegisterScreen extends ConsumerWidget {
                   Checkbox(
                     value: false,
                     onChanged: (val) {},
-                    fillColor: MaterialStateProperty.resolveWith((states) => 
+                    fillColor: WidgetStateProperty.resolveWith((states) => 
                       theme.colorScheme.surface
                     ),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
@@ -128,7 +128,7 @@ class RegisterScreen extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: theme.colorScheme.primary.withOpacity(0.4),
+                      color: theme.colorScheme.primary.withAlpha(102),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -136,9 +136,9 @@ class RegisterScreen extends ConsumerWidget {
                 ),
                 child: ElevatedButton(
                   onPressed: () {},
-                  child: Row(
+                  child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
+                    children: [
                       Text('CREAR CUENTA'),
                       SizedBox(width: 8),
                       Icon(Icons.arrow_forward),
@@ -190,3 +190,4 @@ class RegisterScreen extends ConsumerWidget {
     );
   }
 }
+

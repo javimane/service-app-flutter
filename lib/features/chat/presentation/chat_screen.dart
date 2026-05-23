@@ -1,89 +1,197 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'dart:async';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../core/data/repositories/chat_repository.dart';
+import '../../../core/services/notification_service.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
+
+  @override
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends ConsumerState<ChatScreen> {
+  Timer? _pollTimer;
+  List<dynamic> _lastConversations = [];
+
+  @override
+  void initState() {
+    super.initState();
+    // start polling for new conversations/messages
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final supabase = Supabase.instance.client;
+      final userId = supabase.auth.currentUser?.id;
+      if (userId != null) {
+        _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
+          try {
+            final messenger = ScaffoldMessenger.of(context);
+            final convos = await ref
+                .read(chatRepositoryProvider)
+                .getUserConversations(userId: userId);
+            // compare unread counts
+            for (final c in convos) {
+              final id = c['id'].toString();
+              final prev = _lastConversations.firstWhere((e) => e['id'] == id,
+                  orElse: () => null);
+              final prevUnread =
+                  prev != null ? (prev['unreadCount'] as int? ?? 0) : 0;
+              final nowUnread = c['unreadCount'] as int? ?? 0;
+              if (nowUnread > prevUnread) {
+                final from = id;
+                final last = c['message'] as String? ?? '';
+                NotificationService.showNotification(
+                    title: 'Mensaje de $from', body: last);
+                messenger.showSnackBar(
+                    SnackBar(content: Text('Nuevo mensaje de $from')));
+              }
+            }
+            if (!mounted) return;
+            _lastConversations = convos;
+            setState(() {});
+          } catch (_) {}
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pollTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final supabase = Supabase.instance.client;
+    final userId = supabase.auth.currentUser?.id;
 
-    return SafeArea(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('MENSAJES',
-                    style: theme.textTheme.headlineMedium
-                        ?.copyWith(fontWeight: FontWeight.bold)),
-                IconButton(
-                    icon: const Icon(Icons.edit_square), onPressed: () {}),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(30),
-                border:
-                    Border.all(color: isDark ? Colors.white10 : Colors.black12),
-              ),
-              child: const TextField(
-                  decoration: InputDecoration(
-                      hintText: 'Buscar en chats...',
-                      border: InputBorder.none,
-                      icon: Icon(Icons.search))),
-            ),
-          ),
-          const SizedBox(height: 24),
-          Expanded(
-            child: ListView.builder(
-              itemCount: 4,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                  leading: const CircleAvatar(
-                      radius: 28,
-                      backgroundImage:
-                          NetworkImage('https://i.pravatar.cc/150?img=33')),
-                  title: const Text('Marcus Thorne',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle:
-                      const Text('He revisado los planos, podemos empeza...'),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('10:42 AM',
-                          style: TextStyle(
-                              color: isDark ? Colors.white54 : Colors.black54,
-                              fontSize: 12)),
-                      if (index == 0)
-                        Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          padding: const EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                              color: theme.colorScheme.secondary,
-                              shape: BoxShape.circle),
-                          child: const Text('2',
-                              style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold)),
-                        )
-                    ],
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(24.r),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.arrow_back_rounded, size: 24.r),
+                    onPressed: () => context.pop(),
                   ),
-                );
-              },
+                  SizedBox(width: 8.w),
+                  Text(
+                    'MENSAJES',
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 24.sp,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.edit_square, size: 24.r),
+                    onPressed: () {},
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(30.r),
+                  border: Border.all(color: Colors.transparent),
+                ),
+                child: const TextField(
+                  decoration: InputDecoration(
+                    hintText: 'Buscar en chats...',
+                    border: InputBorder.none,
+                    icon: Icon(Icons.search),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 24.h),
+            Expanded(
+              child: userId == null
+                  ? const Center(
+                      child: Text('Inicia sesión para ver tus mensajes'))
+                  : FutureBuilder<List<dynamic>>(
+                      future: ref
+                          .read(chatRepositoryProvider)
+                          .getUserConversations(userId: userId),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        }
+                        final convos = snapshot.data ?? [];
+                        if (convos.isEmpty) {
+                          return const Center(
+                              child: Text('Sin conversaciones'));
+                        }
+                        return ListView.builder(
+                          itemCount: convos.length,
+                          itemBuilder: (context, index) {
+                            final c = convos[index] as Map<String, dynamic>;
+                            final name = c['id'] as String;
+                            final last = c['message'] as String? ?? '';
+                            final unread = c['unreadCount'] as int? ?? 0;
+                            return ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 24.w, vertical: 8.h),
+                              leading: CircleAvatar(
+                                  radius: 28.r,
+                                  child:
+                                      Text(name.substring(0, 2).toUpperCase())),
+                              title: Text(name,
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16.sp)),
+                              subtitle: Text(last,
+                                  maxLines: 1, overflow: TextOverflow.ellipsis),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(c['updated_at']?.toString() ?? '',
+                                      style: TextStyle(
+                                          color: Colors.grey, fontSize: 12.sp)),
+                                  if (unread > 0)
+                                    Container(
+                                      margin: EdgeInsets.only(top: 4.h),
+                                      padding: EdgeInsets.all(6.r),
+                                      decoration: BoxDecoration(
+                                          color: theme.colorScheme.secondary,
+                                          shape: BoxShape.circle),
+                                      child: Text(unread.toString(),
+                                          style: const TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.bold)),
+                                    )
+                                ],
+                              ),
+                              onTap: () {
+                                // abrir conversación - por ahora navegamos al perfil si es profesional
+                                context.push('/specialist/$name');
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

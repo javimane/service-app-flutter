@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:service_app_flutter/features/home/presentation/home_screen.dart';
 import 'package:service_app_flutter/features/map/presentation/map_screen.dart';
-import 'package:service_app_flutter/features/chat/presentation/chat_screen.dart';
-import 'package:service_app_flutter/features/profile/presentation/settings_screen.dart';
+import 'package:service_app_flutter/features/categories/presentation/categories_screen.dart';
+// Removed unused imports: chat_screen and settings_screen
 
 class MainScaffold extends ConsumerStatefulWidget {
   final Widget child;
@@ -19,11 +20,11 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   // aquí usamos un bottom nav bar estático para la demostración UI.
   int currentIndex = 0;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    MapScreen(),
-    ChatScreen(),
-    SettingsScreen(),
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const CategoriesScreen(),
+    const MapScreen(),
+    const Center(child: Text('Videos & Reels')), // Placeholder para Videos
   ];
 
   @override
@@ -36,13 +37,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         index: currentIndex,
         children: _screens,
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showDashboardMenu(context),
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        child: const Icon(Icons.add),
-      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
@@ -52,7 +46,13 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         ),
         child: BottomNavigationBar(
           currentIndex: currentIndex,
-          onTap: (index) => setState(() => currentIndex = index),
+          onTap: (index) {
+            if (index == 4) {
+              _showDashboardMenu(context);
+            } else {
+              setState(() => currentIndex = index);
+            }
+          },
           backgroundColor: Colors.transparent,
           elevation: 0,
           type: BottomNavigationBarType.fixed,
@@ -64,16 +64,20 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
               label: 'Inicio',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.explore_outlined),
-              label: 'Explorar',
+              icon: Icon(Icons.category_outlined),
+              label: 'Categorías',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline),
-              label: 'Mensajes',
+              icon: Icon(Icons.map_outlined),
+              label: 'Mapa',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              label: 'Perfil',
+              icon: Icon(Icons.play_circle_outline),
+              label: 'Videos',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.menu),
+              label: 'Menú',
             ),
           ],
         ),
@@ -94,47 +98,79 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
       ),
       builder: (context) {
         return DraggableScrollableSheet(
-          initialChildSize: 0.6,
-          minChildSize: 0.4,
-          maxChildSize: 0.9,
+          initialChildSize: 0.8,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
           expand: false,
           builder: (context, scrollController) {
-            return Column(
-              children: [
-                const SizedBox(height: 12),
-                Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.white24 : Colors.black12,
-                    borderRadius: BorderRadius.circular(2),
+            return SingleChildScrollView(
+              controller: scrollController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 12.h),
+                  Center(
+                    child: Container(
+                      width: 40.w,
+                      height: 4.h,
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white24 : Colors.black12,
+                        borderRadius: BorderRadius.circular(2.r),
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Dashboard',
-                  style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
-                Expanded(
-                  child: ListView(
-                    controller: scrollController,
-                    children: [
-                      _buildMenuItem(context, Icons.dashboard_outlined, 'Principal Dashboard'),
-                      _buildMenuItem(context, Icons.person_outline, 'Mi Perfil'),
-                      _buildMenuItem(context, Icons.analytics_outlined, 'Analytics'),
-                      _buildMenuItem(context, Icons.request_quote_outlined, 'Presupuestos'),
-                      _buildMenuItem(context, Icons.local_offer_outlined, 'Promociones'),
-                      _buildMenuItem(context, Icons.account_balance_outlined, 'Promociones Bancarias'),
-                      _buildMenuItem(context, Icons.inventory_2_outlined, 'Productos'),
-                      _buildMenuItem(context, Icons.calendar_month_outlined, 'Calendario'),
-                      _buildMenuItem(context, Icons.video_library_outlined, 'Reels'),
-                      _buildMenuItem(context, Icons.card_membership_outlined, 'Subscripción'),
-                      _buildMenuItem(context, Icons.settings_outlined, 'Configuración'),
-                    ],
+                  Padding(
+                    padding: EdgeInsets.all(20.r),
+                    child: Text(
+                      'Menú Principal',
+                      style: theme.textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
-              ],
+                  _buildSectionHeader(theme, 'PARA TI'),
+                  _buildMenuItem(context, Icons.people_outline,
+                      'Professionales/Comercios'),
+                  _buildMenuItem(
+                      context, Icons.local_offer_outlined, 'Promociones'),
+                  _buildMenuItem(
+                      context, Icons.inventory_2_outlined, 'Productos'),
+                  _buildMenuItem(context, Icons.map_outlined, 'Mapa'),
+                  _buildMenuItem(context, Icons.build_outlined, 'Servicios'),
+                  _buildMenuItem(context, Icons.movie_filter_outlined, 'Reels'),
+                  const Divider(),
+                  _buildSectionHeader(theme, 'DASHBOARD'),
+                  _buildMenuItem(
+                      context, Icons.notifications_none, 'Notificaciones'),
+                  _buildMenuItem(
+                      context, Icons.chat_bubble_outline, 'Mensajes'),
+                  _buildMenuItem(
+                      context, Icons.request_quote_outlined, 'Presupuestos'),
+                  _buildMenuItem(
+                      context, Icons.discount_outlined, 'Promociones'),
+                  _buildMenuItem(context, Icons.account_balance_outlined,
+                      'Promociones Bancarias'),
+                  _buildMenuItem(context, Icons.category_outlined, 'Productos'),
+                  _buildMenuItem(context, Icons.person_outline, 'Perfil'),
+                  _buildMenuItem(context, Icons.miscellaneous_services_outlined,
+                      'Servicios'),
+                  _buildMenuItem(
+                      context, Icons.calendar_month_outlined, 'Calendario'),
+                  _buildMenuItem(
+                      context, Icons.video_collection_outlined, 'Reels'),
+                  _buildMenuItem(context, Icons.share_outlined, 'Referidos'),
+                  const Divider(),
+                  _buildSectionHeader(theme, 'CONFIGURACIÓN'),
+                  _buildMenuItem(
+                      context, Icons.card_membership_outlined, 'Subscripción'),
+                  _buildMenuItem(
+                      context, Icons.badge_outlined, 'Datos Generales'),
+                  const Divider(),
+                  _buildMenuItem(context, Icons.help_outline, 'Ayuda'),
+                  _buildMenuItem(context, Icons.logout, 'Cerrar Sesión',
+                      isDestructive: true),
+                  SizedBox(height: 40.h),
+                ],
+              ),
             );
           },
         );
@@ -142,19 +178,42 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     );
   }
 
-  Widget _buildMenuItem(BuildContext context, IconData icon, String title) {
+  Widget _buildSectionHeader(ThemeData theme, String title) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+      child: Text(
+        title,
+        style: theme.textTheme.labelLarge?.copyWith(
+          color: theme.colorScheme.secondary,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(BuildContext context, IconData icon, String title,
+      {bool isDestructive = false}) {
     final theme = Theme.of(context);
     return ListTile(
-      leading: Icon(icon, color: theme.colorScheme.primary),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w500)),
-      trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.grey),
+      leading: Icon(
+        icon,
+        color:
+            isDestructive ? theme.colorScheme.error : theme.colorScheme.primary,
+        size: 24.r,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w500,
+          fontSize: 14.sp,
+          color: isDestructive ? theme.colorScheme.error : null,
+        ),
+      ),
+      trailing: Icon(Icons.chevron_right, size: 20.r, color: Colors.grey),
       onTap: () {
-        Navigator.pop(context); // Close the bottom sheet
-        if (title == 'Principal Dashboard') {
-          // Temporarily use GoRouter context.push without importing if we assume go_router is available globally,
-          // but we might need to import go_router in main_scaffold.dart. 
-          // Actually, let's just make sure go_router is imported.
-        }
+        Navigator.pop(context);
+        // Lógica de navegación con GoRouter aquí
       },
     );
   }

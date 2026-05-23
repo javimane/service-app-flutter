@@ -10,18 +10,20 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late GoogleMapController mapController;
-  
-  final LatLng _center = const LatLng(-12.046374, -77.042793); // Centro de ejemplo
+
+  final LatLng _center =
+      const LatLng(-12.046374, -77.042793); // Centro de ejemplo
   final Set<Marker> _markers = {};
 
   @override
   void initState() {
     super.initState();
     _markers.add(
-      Marker(
-        markerId: const MarkerId('1'),
-        position: const LatLng(-12.046374, -77.042793),
-        infoWindow: const InfoWindow(title: 'Especialista', snippet: 'Plomería - \$50/hr'),
+      const Marker(
+        markerId: MarkerId('1'),
+        position: LatLng(-12.046374, -77.042793),
+        infoWindow:
+            InfoWindow(title: 'Especialista', snippet: 'Plomería - \$50/hr'),
       ),
     );
   }
@@ -33,7 +35,6 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
       body: Stack(
@@ -56,12 +57,16 @@ class _MapScreenState extends State<MapScreen> {
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.surface,
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
-                        BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10, offset: const Offset(0, 5)),
+                        BoxShadow(
+                            color: Colors.black.withAlpha(26),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5)),
                       ],
                     ),
                     child: const TextField(
@@ -73,14 +78,14 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  SingleChildScrollView(
+                  const SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
                         _FilterChip(label: 'Provincia'),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         _FilterChip(label: 'Departamento'),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 8),
                         _FilterChip(label: 'Categorías'),
                       ],
                     ),
@@ -97,7 +102,8 @@ class _MapScreenState extends State<MapScreen> {
               backgroundColor: theme.colorScheme.surface,
               child: Icon(Icons.my_location, color: theme.colorScheme.primary),
               onPressed: () {
-                mapController.animateCamera(CameraUpdate.newLatLngZoom(_center, 14.0));
+                mapController
+                    .animateCamera(CameraUpdate.newLatLngZoom(_center, 14.0));
               },
             ),
           ),
@@ -116,7 +122,7 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -127,7 +133,9 @@ class _FilterChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(label,
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
           const SizedBox(width: 4),
           const Icon(Icons.keyboard_arrow_down, size: 16),
         ],

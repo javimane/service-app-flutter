@@ -1,72 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-const Color _primaryColor = Color(0xFFF05A28); // Brand Orange
-const Color _secondaryColor = Color(0xFFE2E8F0); // Light Gray
-const Color _bgDarkColor = Color(0xFF101014); // Very dark gray, almost black
-const Color _surfaceDarkColor = Color(0xFF1E1E24);
-const Color _bgLightColor = Color(0xFFF5F5F5); // Light Gray Background
-const Color _surfaceLightColor = Color(0xFFFFFFFF); // White Surface
 
 final themeModeProvider = StateProvider<ThemeMode>((ref) => ThemeMode.light);
 
 class AppTheme {
+  static const Color primaryCoral = Color(0xFFFF7F50);
+  static const Color secondaryBlue = Color(0xFF2196F3);
+  static const Color successGreen = Color(0xFF4CAF50);
+  static const Color errorRed = Color(0xFFF44336);
+  static const Color neutralGrey = Color(0xFF9E9E9E);
+
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      colorScheme: ColorScheme.light(
-        primary: _primaryColor,
-        secondary: _secondaryColor,
-        surface: _surfaceLightColor,
+      colorScheme: const ColorScheme.light(
+        primary: primaryCoral,
+        secondary: secondaryBlue,
+        surface: Colors.white,
+        error: errorRed,
+        onPrimary: Colors.white,
+        onSecondary: Colors.white,
       ),
-      scaffoldBackgroundColor: _bgLightColor,
-      textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.black,
-      ),
+      scaffoldBackgroundColor: const Color(0xFFF8F9FA),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: _primaryColor,
+          backgroundColor: primaryCoral,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1.2),
+          minimumSize: const Size.fromHeight(50),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
+      // Añadir aquí configuraciones de TextTheme usando ScreenUtil en los widgets
     );
   }
 
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: ColorScheme.dark(
-        primary: _primaryColor,
-        secondary: _secondaryColor,
-        surface: _surfaceDarkColor,
+      colorScheme: const ColorScheme.dark(
+        primary: primaryCoral,
+        secondary: secondaryBlue,
+        surface: Color(0xFF1A1A1A),
+        error: errorRed,
       ),
-      scaffoldBackgroundColor: _bgDarkColor,
-      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: Colors.white,
-      ),
+      scaffoldBackgroundColor: const Color(0xFF121212),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: _primaryColor,
+          backgroundColor: primaryCoral,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(30),
-          ),
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1.2),
+          minimumSize: const Size.fromHeight(50),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
       ),
     );

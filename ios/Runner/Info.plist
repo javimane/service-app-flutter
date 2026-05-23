@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Privacy keys required for location, photos/camera and notifications -->
+  <key>NSLocationWhenInUseUsageDescription</key>
+  <string>La app necesita acceder a tu ubicación para mostrar servicios y rutas cercanas.</string>
+  <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+  <string>La app utiliza tu ubicación en segundo plano para actualizar información relevante.</string>
+  <key>NSCameraUsageDescription</key>
+  <string>La app necesita acceder a la cámara para tomar fotos que puedas subir.</string>
+  <key>NSPhotoLibraryUsageDescription</key>
+  <string>La app necesita acceder a tu galería para seleccionar imágenes para subir.</string>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>Necesitamos el micrófono para grabar audio si adjuntas multimedia con sonido.</string>
+  <!-- Para notificaciones locales/push no es estrictamente obligatorio añadir una clave, pero es buena práctica documentarlo -->
+  <key>NSUserNotificationUsageDescription</key>
+  <string>La app enviará notificaciones para avisarte de mensajes y actualizaciones importantes.</string>
+</dict>
+</plist>
