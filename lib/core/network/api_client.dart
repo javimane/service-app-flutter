@@ -13,6 +13,7 @@ String _getBaseUrl() {
 
 class ApiClient {
   late final Dio _dio;
+  String? _apiKey;
 
   ApiClient() {
     _dio = Dio(BaseOptions(
@@ -32,6 +33,13 @@ class ApiClient {
         if (session != null) {
           options.headers['Authorization'] = 'Bearer ${session.accessToken}';
         }
+        // Attach API key header if configured and not already provided
+        if (_apiKey != null &&
+            _apiKey!.isNotEmpty &&
+            (options.headers['x-api-key'] == null &&
+                options.headers['X-API-KEY'] == null)) {
+          options.headers['x-api-key'] = _apiKey!;
+        }
         return handler.next(options);
       },
       onError: (DioException error, handler) {
@@ -42,6 +50,11 @@ class ApiClient {
   }
 
   Dio get dio => _dio;
+
+  /// Set a global API key that will be added to requests as `x-api-key`.
+  void setApiKey(String key) {
+    _apiKey = key;
+  }
 
   // Simple GET wrapper
   Future<Response> get(String path,

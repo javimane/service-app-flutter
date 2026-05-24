@@ -4,6 +4,7 @@ import '../../providers/api_client_provider.dart';
 import '../../services/api_constants.dart';
 import '../models/product_model.dart';
 import '../models/categories.model.dart';
+import '../models/professional_product_model.dart';
 
 class ProductsRepository {
   final ApiClient _client;
@@ -33,13 +34,14 @@ class ProductsRepository {
     return ProductModel.fromJson(response.data as Map<String, dynamic>);
   }
 
-  Future<List<ProductModel>> getProductsByProfessional(
+  Future<List<ProfessionalProductModel>> getProductsByProfessional(
       int professionalId) async {
     final response = await _client
         .get('${ApiConstants.products}/professional/$professionalId');
     final data = response.data as List<dynamic>;
     return data
-        .map((e) => ProductModel.fromJson(e as Map<String, dynamic>))
+        .map(
+            (e) => ProfessionalProductModel.fromJson(e as Map<String, dynamic>))
         .toList();
   }
 

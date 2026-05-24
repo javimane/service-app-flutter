@@ -1,5 +1,8 @@
+import 'profile_model.dart';
+
 class ProfessionalModel {
   final int id;
+  final String userId;
   final String? bio;
   final double? ratingAvg;
   final bool isActive;
@@ -7,13 +10,21 @@ class ProfessionalModel {
   final String? displayName;
   final String? avatarUrl;
   final String? website;
+  final String? webUrl;
   final bool isVerified;
   final int completedJobs;
   final int yearsExperience;
   final int profileViews;
+  final String? createdAt;
+  final String? updatedAt;
+  final String? deletedAt;
+  final bool? isMatriculate;
+  final bool? emergency;
+  final ProfileModel? profile;
 
   ProfessionalModel({
     required this.id,
+    required this.userId,
     this.bio,
     this.ratingAvg,
     required this.isActive,
@@ -21,16 +32,24 @@ class ProfessionalModel {
     this.displayName,
     this.avatarUrl,
     this.website,
+    this.webUrl,
     this.isVerified = false,
     this.completedJobs = 0,
     this.yearsExperience = 0,
     this.profileViews = 0,
+    this.createdAt,
+    this.updatedAt,
+    this.deletedAt,
+    this.isMatriculate,
+    this.emergency,
+    this.profile,
   });
 
   factory ProfessionalModel.fromJson(Map<String, dynamic> json) {
     final profile = json['Profile'] as Map<String, dynamic>?;
     return ProfessionalModel(
       id: json['id'] as int,
+      userId: json['user_id'] as String? ?? '',
       bio: json['bio'] as String?,
       ratingAvg: (json['rating_avg'] as num?)?.toDouble(),
       isActive: json['is_active'] as bool? ?? true,
@@ -38,10 +57,17 @@ class ProfessionalModel {
       displayName: profile?['display_name'] as String?,
       avatarUrl: profile?['avatar_url'] as String?,
       website: profile?['website'] as String?,
+      webUrl: json['web_url'] as String?,
       isVerified: json['is_verified'] as bool? ?? false,
       completedJobs: json['completed_jobs'] as int? ?? 0,
       yearsExperience: json['years_experience'] as int? ?? 0,
       profileViews: json['profile_views'] as int? ?? 0,
+      createdAt: json['created_at'] as String?,
+      updatedAt: json['updated_at'] as String?,
+      deletedAt: json['deleted_at'] as String?,
+      isMatriculate: json['is_matriculate'] as bool?,
+      emergency: json['emergency'] as bool?,
+      profile: profile != null ? ProfileModel.fromJson(profile) : null,
     );
   }
 

@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../network/api_client.dart';
 import '../../providers/api_client_provider.dart';
 import '../../services/api_constants.dart';
-import 'package:service_app_flutter/data/models/api_models.dart';
+import '../models/address_model.dart';
 
 class AddressesRepository {
   final ApiClient _client;

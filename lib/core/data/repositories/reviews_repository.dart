@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../network/api_client.dart';
 import '../../providers/api_client_provider.dart';
 import '../../services/api_constants.dart';
-import '../models/misc_models.dart';
+import '../models/review_model.dart';
 
 class ReviewsRepository {
   final ApiClient _client;
