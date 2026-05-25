@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 String _getBaseUrl() {
   if (kIsWeb) return 'http://localhost:3000/api';
@@ -28,10 +29,17 @@ class ApiClient {
 
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        // Add Authorization header if session exists
-        final session = Supabase.instance.client.auth.currentSession;
-        if (session != null) {
-          options.headers['Authorization'] = 'Bearer ${session.accessToken}';
+        // Add Authorization header if session exists in storage
+        const storage = FlutterSecureStorage();
+        final sessionString = await storage.read(key: 'auth_session');
+        if (sessionString != null) {
+          try {
+            final sessionMap = jsonDecode(sessionString);
+            if (sessionMap['access_token'] != null) {
+              options.headers['Authorization'] =
+                  'Bearer ${sessionMap['access_token']}';
+            }
+          } catch (_) {}
         }
         // Attach API key header if configured and not already provided
         if (_apiKey != null &&
@@ -46,6 +54,16 @@ class ApiClient {
         // Log or handle global errors here
         return handler.next(error);
       },
+    ));
+
+    // Add a log interceptor for debug (remove or disable in production)
+    _dio.interceptors.add(LogInterceptor(
+      request: true,
+      requestHeader: true,
+      requestBody: true,
+      responseHeader: true,
+      responseBody: true,
+      error: true,
     ));
   }
 

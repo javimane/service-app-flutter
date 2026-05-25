@@ -8,7 +8,7 @@ final apiClientProvider = Provider<ApiClient>((ref) {
   const envKey = String.fromEnvironment('WEB_API_KEY_SECRET', defaultValue: '');
   final apiKey = envKey.isNotEmpty
       ? envKey
-      : (dotenv.env['WEB_API_KEY_SECRET'] ?? dotenv.env['WEB_API_KEY'] ?? '');
+      : (dotenv.isInitialized ? (dotenv.env['WEB_API_KEY_SECRET'] ?? dotenv.env['WEB_API_KEY'] ?? '') : '');
   if (apiKey.isNotEmpty) client.setApiKey(apiKey);
   return client;
 });

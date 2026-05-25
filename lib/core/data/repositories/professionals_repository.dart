@@ -9,10 +9,32 @@ class ProfessionalsRepository {
 
   ProfessionalsRepository(this._client);
 
-  Future<List<ProfessionalModel>> getProfessionals({int? limit}) async {
+  Future<List<ProfessionalModel>> getProfessionals({
+    int? limit,
+    int? categoryId,
+    int? provinceId,
+    int? departmentId,
+    String? query,
+    double? lat,
+    double? lng,
+    int? radius,
+    bool? publicTrade,
+  }) async {
+    final queryParameters = <String, dynamic>{
+      if (limit != null) 'limit': limit.toString(),
+      if (categoryId != null) 'categoryId': categoryId.toString(),
+      if (provinceId != null) 'province_id': provinceId.toString(),
+      if (departmentId != null) 'department_id': departmentId.toString(),
+      if (query != null && query.isNotEmpty) 'name': query,
+      if (lat != null) 'lat': lat.toString(),
+      if (lng != null) 'lng': lng.toString(),
+      if (radius != null) 'radius': radius.toString(),
+      if (publicTrade != null) 'public_trade': publicTrade.toString(),
+    };
+
     final response = await _client.get(
       ApiConstants.professionals,
-      queryParameters: limit != null ? {'limit': limit} : null,
+      queryParameters: queryParameters.isNotEmpty ? queryParameters : null,
     );
     final data = response.data as List<dynamic>;
     return data

@@ -2,6 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
 import '../repositories/auth_repository.dart';
 
 class AuthState {
@@ -25,10 +29,11 @@ class AuthState {
 
 class AuthNotifier extends StateNotifier<AuthState> {
   final Ref ref;
+  final AuthRepository _repo;
   static const _storageKey = 'auth_session';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
-  AuthNotifier(this.ref) : super(AuthState()) {
+  AuthNotifier(this.ref, this._repo) : super(AuthState()) {
     // restore session asynchronously
     Future.microtask(() async {
       await _restoreSession();
@@ -56,8 +61,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(session: session);
       // Optionally validate session by calling getSession
       try {
-        final repo = ref.read(authRepositoryProvider);
-        final remote = await repo.getSession();
+        final remote = await _repo.getSession();
         if (remote.isNotEmpty) {
           state = state.copyWith(session: remote);
           await _saveSession(remote);
@@ -69,10 +73,48 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> login(String email, String password) async {
     state = state.copyWith(loading: true, error: null);
     try {
-      final repo = ref.read(authRepositoryProvider);
-      final resp = await repo.login(email, password);
+      debugPrint('AuthNotifier.login: leyendo authRepositoryProvider');
+      late final dynamic repo;
+      try {
+        final repo = _repo;
+      } catch (e, st) {
+        debugPrint('AuthNotifier.login: error al leer provider -> $e');
+        debugPrint('$st');
+        rethrow;
+      }
+      debugPrint('AuthNotifier.login: repo obtenido, llamando repo.login');
+      final resp = await _repo.login(email, password);
+      debugPrint('AuthNotifier.login: _repo.login finalizado con exito');
       // save session
       await _saveSession(resp);
+
+      // Supabase Login (Chat)
+      try {
+        debugPrint('AuthNotifier.login: Iniciando Supabase signInWithPassword');
+        await Supabase.instance.client.auth.signInWithPassword(
+          email: email,
+          password: password,
+        ).timeout(const Duration(seconds: 5));
+        debugPrint('AuthNotifier.login: Supabase login exitoso');
+      } catch (e) {
+        debugPrint('Supabase login error: $e');
+      }
+
+      // Firebase Token Registration (Push Notifications)
+      try {
+        debugPrint('AuthNotifier.login: Solicitando token de Firebase');
+        final token = await FirebaseMessaging.instance.getToken().timeout(const Duration(seconds: 5));
+        debugPrint('AuthNotifier.login: Token Firebase obtenido');
+        if (token != null) {
+          final platform =
+              kIsWeb ? 'web' : (Platform.isIOS ? 'ios' : 'android');
+          await _repo.registerDeviceToken(token, platform).timeout(const Duration(seconds: 5));
+          debugPrint('AuthNotifier.login: Token Firebase registrado en backend');
+        }
+      } catch (e) {
+        debugPrint('Firebase token registration error: $e');
+      }
+
       state = state.copyWith(loading: false, session: resp, error: null);
     } catch (e) {
       state = state.copyWith(loading: false, error: e.toString());
@@ -83,7 +125,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> register(String email, String password) async {
     state = state.copyWith(loading: true, error: null);
     try {
-      final repo = ref.read(authRepositoryProvider);
+      final repo = _repo;
       await repo.register(email, password);
       // try auto-login
       await login(email, password);
@@ -114,5 +156,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
 final authNotifierProvider =
     StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(ref);
+  final repo = ref.read(authRepositoryProvider);
+  return AuthNotifier(ref, repo);
 });

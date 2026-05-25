@@ -6,9 +6,17 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/services/notification_service.dart';
 import 'core/router/app_router.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'data/services/alert_service.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    // Ignore error if Firebase is not yet configured with google-services.json
+  }
   // Load .env (if present) so dotenv values are available at runtime.
   try {
     await dotenv.load();
@@ -35,8 +43,6 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
-
     return ScreenUtilInit(
       designSize: const Size(393, 852),
       minTextAdapt: true,
@@ -44,10 +50,10 @@ class MyApp extends ConsumerWidget {
       builder: (context, child) {
         return MaterialApp.router(
           title: 'Sercio',
+          scaffoldMessengerKey: AlertService.messengerKey,
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeMode,
+          themeMode: ThemeMode.light,
           routerConfig: appRouter,
         );
       },

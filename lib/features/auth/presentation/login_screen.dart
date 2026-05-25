@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/data/notifiers/auth_notifier.dart';
+import '../../../data/services/alert_service.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -35,7 +36,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
     final router = GoRouter.of(context);
-    final messenger = ScaffoldMessenger.of(context);
 
     try {
       await ref
@@ -45,8 +45,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       router.go('/home');
     } catch (e) {
       if (mounted) {
-        messenger
-            .showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+        AlertService.showError('Error: ${e.toString()}');
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -196,7 +195,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ? null
                       : () async {
                           final router = GoRouter.of(context);
-                          final messenger = ScaffoldMessenger.of(context);
                           setState(() => _loading = true);
                           try {
                             await ref
@@ -205,10 +203,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             if (!mounted) return;
                             router.go('/home');
                           } catch (e) {
-                            if (mounted)
-                              messenger.showSnackBar(SnackBar(
-                                  content: Text(
-                                      'Error test login: ${e.toString()}')));
+                            if (mounted) {
+                              AlertService.showError(
+                                  'Error test login: ${e.toString()}');
+                            }
                           } finally {
                             if (mounted) setState(() => _loading = false);
                           }

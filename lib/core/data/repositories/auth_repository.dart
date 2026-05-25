@@ -26,11 +26,22 @@ class AuthRepository {
   }
 
   Future<Map<String, dynamic>> login(String email, String password) async {
-    final resp = await _client.post(ApiConstants.login, data: {
-      'email': email,
-      'password': password,
-    });
-    return resp.data as Map<String, dynamic>;
+    try {
+      // Trace for debugging login flow
+      // ignore: avoid_print
+      print('AuthRepository.login: enviando petición a ${ApiConstants.login}');
+      final resp = await _client.post(ApiConstants.login, data: {
+        'email': email,
+        'password': password,
+      });
+      // ignore: avoid_print
+      print('AuthRepository.login: respuesta recibida ${resp.statusCode}');
+      return resp.data as Map<String, dynamic>;
+    } catch (e) {
+      // ignore: avoid_print
+      print('AuthRepository.login: error -> $e');
+      rethrow;
+    }
   }
 
   Future<Map<String, dynamic>> loginGoogle(String accessToken) async {
@@ -61,6 +72,13 @@ class AuthRepository {
     final resp = await _client.put('${ApiConstants.session}/update-password',
         data: {'password': password});
     return resp.data as Map<String, dynamic>;
+  }
+
+  Future<void> registerDeviceToken(String token, String platform) async {
+    await _client.post(ApiConstants.deviceTokens, data: {
+      'token': token,
+      'platform': platform,
+    });
   }
 }
 

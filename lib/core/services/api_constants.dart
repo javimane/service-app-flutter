@@ -26,6 +26,7 @@ class ApiConstants {
 
   // Users
   static const String userFavorites = '/users/me/favorites';
+  static const String deviceTokens = '/users/me/device-tokens';
 
   // Subscription
   static const String subscriptionPrice = '/subscription-price';

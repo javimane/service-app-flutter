@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,12 +8,21 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// Leer archivo .env
+val env = Properties()
+val envFile = rootProject.file("../.env")
+if (envFile.exists()) {
+    env.load(FileInputStream(envFile))
+}
+val mapsApiKey = env.getProperty("GOOGLE_MAPS_API_KEY") ?: ""
+
 android {
     namespace = "com.example.service_app_flutter"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -28,6 +40,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // Inyectar el API Key en los recursos de Android
+        resValue("string", "GOOGLE_MAPS_API_KEY", mapsApiKey)
     }
 
     buildTypes {
@@ -41,4 +56,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
