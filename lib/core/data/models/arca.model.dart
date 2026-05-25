@@ -31,18 +31,21 @@ class ArcaModel {
     return ArcaModel(
       id: json['id'] as int,
       companyId: json['company_id'] as int,
-      validFrom: DateTime.parse(json['valid_from'] as String),
-      validTo: DateTime.parse(json['valid_to'] as String),
+      validFrom: DateTime.tryParse(json['valid_from'] as String? ?? '') ??
+          DateTime.now(),
+      validTo: DateTime.tryParse(json['valid_to'] as String? ?? '') ??
+          DateTime.now(),
       isVerified: json['is_verified'] as bool,
       verifiedAt: json['verified_at'] != null
-          ? DateTime.parse(json['verified_at'] as String)
+          ? DateTime.tryParse(json['verified_at'] as String? ?? '')
           : null,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
+          DateTime.now(),
       token: json['token'] as String?,
       tokenExpiresAt: json['token_expires_at'] as String?,
       isActive: json['is_active'] as bool,
-      companyName: json['company_name'] as String,
-      personType: json['person_type'] as String,
+      companyName: json['company_name'] as String? ?? '',
+      personType: json['person_type'] as String? ?? '',
     );
   }
 

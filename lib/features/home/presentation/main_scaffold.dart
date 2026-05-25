@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:service_app_flutter/features/home/presentation/home_screen.dart';
 import 'package:service_app_flutter/features/map/presentation/map_screen.dart';
 import 'package:service_app_flutter/features/categories/presentation/categories_screen.dart';
+import 'package:service_app_flutter/features/chat/presentation/conversations_screen.dart';
+import 'package:go_router/go_router.dart';
 // Removed unused imports: chat_screen and settings_screen
 
 class MainScaffold extends ConsumerStatefulWidget {
@@ -16,16 +18,39 @@ class MainScaffold extends ConsumerStatefulWidget {
 }
 
 class _MainScaffoldState extends ConsumerState<MainScaffold> {
-  // En un entorno real se usaría StatefulShellRoute de go_router,
-  // aquí usamos un bottom nav bar estático para la demostración UI.
-  int currentIndex = 0;
+  int get _currentIndex {
+    final location = GoRouterState.of(context).uri.toString();
+    if (location.startsWith('/home')) return 0;
+    if (location.startsWith('/categories')) return 1;
+    if (location.startsWith('/map')) return 2;
+    if (location.startsWith('/reels')) return 3;
+    if (location.startsWith('/chat')) return 4;
+    return 0; // Default
+  }
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const CategoriesScreen(),
-    const MapScreen(),
-    const Center(child: Text('Videos & Reels')), // Placeholder para Videos
-  ];
+  void _onItemTapped(int index) {
+    if (index == 5) {
+      _showDashboardMenu(context);
+      return;
+    }
+    switch (index) {
+      case 0:
+        context.go('/home');
+        break;
+      case 1:
+        context.go('/categories');
+        break;
+      case 2:
+        context.go('/map');
+        break;
+      case 3:
+        context.go('/reels');
+        break;
+      case 4:
+        context.go('/chat');
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +58,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      body: IndexedStack(
-        index: currentIndex,
-        children: _screens,
-      ),
+      body: widget.child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
@@ -45,14 +67,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
           ),
         ),
         child: BottomNavigationBar(
-          currentIndex: currentIndex,
-          onTap: (index) {
-            if (index == 4) {
-              _showDashboardMenu(context);
-            } else {
-              setState(() => currentIndex = index);
-            }
-          },
+          currentIndex: _currentIndex,
+          onTap: _onItemTapped,
           backgroundColor: Colors.transparent,
           elevation: 0,
           type: BottomNavigationBarType.fixed,
@@ -74,6 +90,10 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
             BottomNavigationBarItem(
               icon: Icon(Icons.play_circle_outline),
               label: 'Videos',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble_outline),
+              label: 'Mensajes',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.menu),

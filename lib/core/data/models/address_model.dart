@@ -43,7 +43,7 @@ class AddressModel {
         professionalId: json['professional_id'] as int,
         provinceId: json['province_id'] as int,
         departmentId: json['department_id'] as int,
-        streetName: json['street_name'] as String,
+        streetName: json['street_name'] as String? ?? '',
         streetNumber: json['street_number'] as String?,
         floorApartment: json['floor_apartment'] as String?,
         zipCode: json['zip_code'] as String?,

@@ -18,8 +18,8 @@ class ProfessionalAvailabilityModel {
         id: json['id'] as int,
         professionalId: json['professional_id'] as int,
         dayOfWeek: json['day_of_week'] as int?,
-        startTime: json['start_time'] as String,
-        endTime: json['end_time'] as String,
+        startTime: json['start_time'] as String? ?? '',
+        endTime: json['end_time'] as String? ?? '',
       );
 
   Map<String, dynamic> toJson() => {

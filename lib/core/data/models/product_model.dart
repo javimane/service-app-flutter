@@ -19,12 +19,12 @@ class ProductImage {
       this.displayOrder});
 
   factory ProductImage.fromJson(Map<String, dynamic> json) => ProductImage(
-        id: json['id'] as String,
-        imageUrl: json['image_url'] as String,
+        id: json['id'] as String? ?? '',
+        imageUrl: json['image_url'] as String? ?? '',
         createdAt: json['created_at'] != null
             ? DateTime.tryParse(json['created_at'] as String)
             : null,
-        productId: json['product_id'] as String,
+        productId: json['product_id'] as String? ?? '',
         updatedAt: json['updated_at'] != null
             ? DateTime.tryParse(json['updated_at'] as String)
             : null,

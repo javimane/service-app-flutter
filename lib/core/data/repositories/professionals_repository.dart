@@ -19,6 +19,10 @@ class ProfessionalsRepository {
     double? lng,
     int? radius,
     bool? publicTrade,
+    String? isMatriculate,
+    String? isVerified,
+    String? emergency,
+    String? specialty,
   }) async {
     final queryParameters = <String, dynamic>{
       if (limit != null) 'limit': limit.toString(),
@@ -30,6 +34,10 @@ class ProfessionalsRepository {
       if (lng != null) 'lng': lng.toString(),
       if (radius != null) 'radius': radius.toString(),
       if (publicTrade != null) 'public_trade': publicTrade.toString(),
+      if (isMatriculate != null) 'is_matriculate': isMatriculate,
+      if (isVerified != null) 'isVerified': isVerified,
+      if (emergency != null) 'emergency': emergency,
+      if (specialty != null) 'specialty': specialty,
     };
 
     final response = await _client.get(

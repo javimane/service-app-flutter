@@ -5,8 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../../core/data/models/professional_model.dart';
-import '../../../core/data/models/categories.model.dart';
-import '../../../core/data/models/location_model.dart';
 import '../providers/map_providers.dart';
 
 class MapScreen extends ConsumerStatefulWidget {
@@ -165,11 +163,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _showProvincesSheet() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
         return SafeArea(
           child: Container(
-            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6),
             padding: const EdgeInsets.symmetric(vertical: 24.0),
             child: Consumer(
               builder: (context, ref, child) {
@@ -180,7 +180,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        child: Text('Selecciona Provincia', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                        child: Text('Selecciona Provincia',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(height: 16),
                       Expanded(
@@ -192,7 +196,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               title: Text(item.name),
                               onTap: () {
                                 ref.read(mapFiltersProvider.notifier).state =
-                                    ref.read(mapFiltersProvider).copyWith(provinceId: item.id, clearDepartment: true);
+                                    ref.read(mapFiltersProvider).copyWith(
+                                        provinceId: item.id,
+                                        clearDepartment: true);
                                 context.pop();
                               },
                             );
@@ -200,10 +206,14 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24.0, vertical: 8.0),
                         child: OutlinedButton(
                           onPressed: () {
-                            ref.read(mapFiltersProvider.notifier).state = ref.read(mapFiltersProvider).copyWith(clearProvince: true, clearDepartment: true);
+                            ref.read(mapFiltersProvider.notifier).state = ref
+                                .read(mapFiltersProvider)
+                                .copyWith(
+                                    clearProvince: true, clearDepartment: true);
                             context.pop();
                           },
                           child: const Center(child: Text('Limpiar Filtro')),
@@ -211,8 +221,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       ),
                     ],
                   ),
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, st) => const Center(child: Text('Error al cargar')),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, st) =>
+                      const Center(child: Text('Error al cargar')),
                 );
               },
             ),
@@ -225,11 +237,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _showDepartmentsSheet() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
         return SafeArea(
           child: Container(
-            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6),
             padding: const EdgeInsets.symmetric(vertical: 24.0),
             child: Consumer(
               builder: (context, ref, child) {
@@ -240,7 +254,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Selecciona un Departamento', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                        Text('Selecciona un Departamento',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold)),
                         const SizedBox(height: 16),
                         const Text('Primero debes seleccionar una provincia.'),
                       ],
@@ -254,7 +272,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        child: Text('Selecciona Departamento', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                        child: Text('Selecciona Departamento',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(height: 16),
                       Expanded(
@@ -266,7 +288,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               title: Text(item.name),
                               onTap: () {
                                 ref.read(mapFiltersProvider.notifier).state =
-                                    ref.read(mapFiltersProvider).copyWith(departmentId: item.id);
+                                    ref
+                                        .read(mapFiltersProvider)
+                                        .copyWith(departmentId: item.id);
                                 context.pop();
                               },
                             );
@@ -274,10 +298,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24.0, vertical: 8.0),
                         child: OutlinedButton(
                           onPressed: () {
-                            ref.read(mapFiltersProvider.notifier).state = ref.read(mapFiltersProvider).copyWith(clearDepartment: true);
+                            ref.read(mapFiltersProvider.notifier).state = ref
+                                .read(mapFiltersProvider)
+                                .copyWith(clearDepartment: true);
                             context.pop();
                           },
                           child: const Center(child: Text('Limpiar Filtro')),
@@ -285,8 +312,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       ),
                     ],
                   ),
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, st) => const Center(child: Text('Error al cargar')),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, st) =>
+                      const Center(child: Text('Error al cargar')),
                 );
               },
             ),
@@ -299,11 +328,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   void _showCategoriesSheet() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
         return SafeArea(
           child: Container(
-            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+            constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.6),
             padding: const EdgeInsets.symmetric(vertical: 24.0),
             child: Consumer(
               builder: (context, ref, child) {
@@ -314,7 +345,11 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        child: Text('Selecciona Categoría', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                        child: Text('Selecciona Categoría',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold)),
                       ),
                       const SizedBox(height: 16),
                       Expanded(
@@ -326,7 +361,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                               title: Text(item.name),
                               onTap: () {
                                 ref.read(mapFiltersProvider.notifier).state =
-                                    ref.read(mapFiltersProvider).copyWith(categoryId: item.id);
+                                    ref
+                                        .read(mapFiltersProvider)
+                                        .copyWith(categoryId: item.id);
                                 context.pop();
                               },
                             );
@@ -334,10 +371,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24.0, vertical: 8.0),
                         child: OutlinedButton(
                           onPressed: () {
-                            ref.read(mapFiltersProvider.notifier).state = ref.read(mapFiltersProvider).copyWith(clearCategory: true);
+                            ref.read(mapFiltersProvider.notifier).state = ref
+                                .read(mapFiltersProvider)
+                                .copyWith(clearCategory: true);
                             context.pop();
                           },
                           child: const Center(child: Text('Limpiar Filtro')),
@@ -345,8 +385,10 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                       ),
                     ],
                   ),
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, st) => const Center(child: Text('Error al cargar')),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, st) =>
+                      const Center(child: Text('Error al cargar')),
                 );
               },
             ),
@@ -358,7 +400,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AsyncValue<List<ProfessionalModel>>>(mapProfessionalsProvider, (previous, next) {
+    ref.listen<AsyncValue<List<ProfessionalModel>>>(mapProfessionalsProvider,
+        (previous, next) {
       if (next is AsyncData && next.value != null && next.value!.isNotEmpty) {
         if (mapController != null) {
           final professionals = next.value!;
@@ -381,7 +424,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
           // Use a small delay to ensure the map has been fully laid out
           Future.delayed(const Duration(milliseconds: 150), () {
-            mapController?.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+            mapController
+                ?.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
           });
         }
       }

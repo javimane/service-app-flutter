@@ -26,13 +26,13 @@ class ProfessionalProposalModel {
 
   factory ProfessionalProposalModel.fromJson(Map<String, dynamic> json) =>
       ProfessionalProposalModel(
-        id: json['id'] as String,
-        fileUrl: json['file_url'] as String,
+        id: json['id'] as String? ?? '',
+        fileUrl: json['file_url'] as String? ?? '',
         accepted: json['accepted'] as bool? ?? false,
-        professionalName: json['professional_name'] as String,
+        professionalName: json['professional_name'] as String? ?? '',
         professionalId: json['professional_id'] as int,
-        userId: json['user_id'] as String,
-        createdAt: json['created_at'] as String,
+        userId: json['user_id'] as String? ?? '',
+        createdAt: json['created_at'] as String? ?? '',
         professional: json['Professional'] != null
             ? ProfessionalModel.fromJson(
                 json['Professional'] as Map<String, dynamic>)

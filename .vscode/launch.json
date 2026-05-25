@@ -8,7 +8,9 @@
       "program": "lib/main.dart",
       "args": [
         "--dart-define=SUPABASE_URL=https://nrxfzwcsrqgwfraqxckp.supabase.co",
-        "--dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yeGZ6d2NzcnFnd2ZyYXF4Y2twIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MzI5OTUsImV4cCI6MjA5NDMwODk5NX0.UKmANlEVLGLvepQamG7NwRQy-JW3iJ0UzUcXYV1jmLw"
+        "--dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yeGZ6d2NzcnFnd2ZyYXF4Y2twIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MzI5OTUsImV4cCI6MjA5NDMwODk5NX0.UKmANlEVLGLvepQamG7NwRQy-JW3iJ0UzUcXYV1jmLw",
+        "--dart-define=GOOGLE_MAPS_API_KEY=AIzaSyDM4stJEAxZmVFzQeSqO0uw5fFL154__WM",
+        "--dart-define=WEB_API_KEY_SECRET=AKIA6P346VGXNBRTG3VM"
       ]
     },
     {
@@ -26,6 +28,8 @@
       "args": [
         "--dart-define=SUPABASE_URL=https://nrxfzwcsrqgwfraqxckp.supabase.co",
         "--dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5yeGZ6d2NzcnFnd2ZyYXF4Y2twIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3MzI5OTUsImV4cCI6MjA5NDMwODk5NX0.UKmANlEVLGLvepQamG7NwRQy-JW3iJ0UzUcXYV1jmLw",
+        "--dart-define=GOOGLE_MAPS_API_KEY=AIzaSyDM4stJEAxZmVFzQeSqO0uw5fFL154__WM",
+        "--dart-define=WEB_API_KEY_SECRET=AKIA6P346VGXNBRTG3VM",
         "--release"
       ]
     },

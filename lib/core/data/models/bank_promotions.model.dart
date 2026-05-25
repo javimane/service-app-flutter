@@ -7,7 +7,7 @@ class BankModel {
   BankModel({required this.id, required this.name});
 
   factory BankModel.fromJson(Map<String, dynamic> json) =>
-      BankModel(id: json['id'] as int, name: json['name'] as String);
+      BankModel(id: json['id'] as int, name: json['name'] as String? ?? '');
 
   Map<String, dynamic> toJson() => {'id': id, 'name': name};
 }
@@ -156,7 +156,7 @@ class BankPromotionModel {
 
     final banksJson = json['bank_promotions_banks'] as List<dynamic>?;
     return BankPromotionModel(
-      id: json['id'] as String,
+      id: json['id'] as String? ?? '',
       percentajeDiscount: (json['percentaje_discount'] ?? 0) as int,
       refund: (json['refund'] ?? 0) as int,
       monday: json['monday'] as bool? ?? false,
@@ -166,12 +166,17 @@ class BankPromotionModel {
       friday: json['friday'] as bool? ?? false,
       saturday: json['saturday'] as bool? ?? false,
       sunday: json['sunday'] as bool? ?? false,
-      fromDate: DateTime.parse(json['from_date'] as String),
-      expirationDate: DateTime.parse(json['expiration_date'] as String),
+      fromDate: DateTime.tryParse(json['from_date'] as String? ?? '') ??
+          DateTime.now(),
+      expirationDate:
+          DateTime.tryParse(json['expiration_date'] as String? ?? '') ??
+              DateTime.now(),
       description: json['description'] as String? ?? '',
       professionalId: json['professional_id'] as int,
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      createdAt: DateTime.tryParse(json['created_at'] as String? ?? '') ??
+          DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? '') ??
+          DateTime.now(),
       state: json['state'] as String? ?? '',
       paymentMethod: parsePaymentMethod(json['payment_method']),
       termsConditions: json['terms_conditions'] as String? ?? '',

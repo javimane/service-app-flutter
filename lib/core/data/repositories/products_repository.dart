@@ -28,7 +28,7 @@ class ProductsRepository {
         .toList();
   }
 
-  Future<ProductModel?> getProductById(int id) async {
+  Future<ProductModel?> getProductById(String id) async {
     final response = await _client.get('${ApiConstants.products}/$id');
     if (response.data == null) return null;
     return ProductModel.fromJson(response.data as Map<String, dynamic>);

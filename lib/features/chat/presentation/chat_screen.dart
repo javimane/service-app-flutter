@@ -1,198 +1,507 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:async';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../../core/data/repositories/chat_repository.dart';
-import '../../../core/services/notification_service.dart';
 
-class ChatScreen extends ConsumerStatefulWidget {
-  const ChatScreen({super.key});
+class ChatScreen extends StatefulWidget {
+  final String chatId;
+  final String? initialMessage;
+
+  const ChatScreen({super.key, required this.chatId, this.initialMessage});
 
   @override
-  ConsumerState<ChatScreen> createState() => _ChatScreenState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends ConsumerState<ChatScreen> {
-  Timer? _pollTimer;
-  List<dynamic> _lastConversations = [];
+class _ChatScreenState extends State<ChatScreen> {
+  late final TextEditingController _controller;
 
   @override
   void initState() {
     super.initState();
-    // start polling for new conversations/messages
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final supabase = Supabase.instance.client;
-      final userId = supabase.auth.currentUser?.id;
-      if (userId != null) {
-        _pollTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
-          try {
-            final messenger = ScaffoldMessenger.of(context);
-            final convos = await ref
-                .read(chatRepositoryProvider)
-                .getUserConversations(userId: userId);
-            // compare unread counts
-            for (final c in convos) {
-              final id = c['id'].toString();
-              final prev = _lastConversations.firstWhere((e) => e['id'] == id,
-                  orElse: () => null);
-              final prevUnread =
-                  prev != null ? (prev['unreadCount'] as int? ?? 0) : 0;
-              final nowUnread = c['unreadCount'] as int? ?? 0;
-              if (nowUnread > prevUnread) {
-                final from = id;
-                final last = c['message'] as String? ?? '';
-                NotificationService.showNotification(
-                    title: 'Mensaje de $from', body: last);
-                messenger.showSnackBar(
-                    SnackBar(content: Text('Nuevo mensaje de $from')));
-              }
-            }
-            if (!mounted) return;
-            _lastConversations = convos;
-            setState(() {});
-          } catch (_) {}
-        });
-      }
-    });
+    _controller = TextEditingController(text: widget.initialMessage);
   }
 
   @override
   void dispose() {
-    _pollTimer?.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final supabase = Supabase.instance.client;
-    final userId = supabase.auth.currentUser?.id;
+    final isDark = theme.brightness == Brightness.dark;
+    const primaryColor = Color(0xFFE85D35); // Naranja de la imagen
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
+      backgroundColor: isDark ? Colors.black : const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        backgroundColor: theme.colorScheme.surface,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.pop(),
+          color: isDark ? Colors.white : Colors.black87,
+        ),
+        titleSpacing: 0,
+        title: Row(
           children: [
-            Padding(
-              padding: EdgeInsets.all(24.r),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back_rounded, size: 24.r),
-                    onPressed: () => context.pop(),
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'MENSAJES',
-                    style: theme.textTheme.headlineMedium?.copyWith(
+            Stack(
+              children: [
+                CircleAvatar(
+                  radius: 20.r,
+                  backgroundColor: primaryColor,
+                  child: Text(
+                    'JV',
+                    style: TextStyle(
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 24.sp,
+                      fontSize: 16.sp,
                     ),
                   ),
-                  const Spacer(),
-                  IconButton(
-                    icon: Icon(Icons.edit_square, size: 24.r),
-                    onPressed: () {},
+                ),
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 12.w,
+                    height: 12.w,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF22C55E), // Verde online
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: theme.colorScheme.surface,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Julian Vargas',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.sp,
+                    ),
+                  ),
+                  Text(
+                    'En línea • Arquitecto & Diseñador',
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12.sp,
+                    ),
                   ),
                 ],
               ),
             ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
-                  borderRadius: BorderRadius.circular(30.r),
-                  border: Border.all(color: Colors.transparent),
-                ),
-                child: const TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Buscar en chats...',
-                    border: InputBorder.none,
-                    icon: Icon(Icons.search),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.phone_outlined),
+            onPressed: () {},
+            color: Colors.grey[600],
+          ),
+          IconButton(
+            icon: const Icon(Icons.videocam_outlined),
+            onPressed: () {},
+            color: Colors.grey[600],
+          ),
+          IconButton(
+            icon: const Icon(Icons.more_vert),
+            onPressed: () {},
+            color: Colors.grey[600],
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: isDark ? Colors.white10 : Colors.black12,
+            height: 1,
+          ),
+        ),
+      ),
+      body: CustomPaint(
+        painter: _DottedBackgroundPainter(
+          color: isDark
+              ? Colors.white10
+              : Colors.black.withAlpha((0.05 * 255).round()),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+                children: [
+                  // Fecha
+                  Center(
+                    child: Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white10 : Colors.white,
+                        borderRadius: BorderRadius.circular(20.r),
+                        boxShadow: [
+                          if (!isDark)
+                            BoxShadow(
+                              color:
+                                  Colors.black.withAlpha((0.02 * 255).round()),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                        ],
+                      ),
+                      child: Text(
+                        'MARTES, 24 OCT',
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[500],
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  SizedBox(height: 24.h),
+
+                  // Mensaje Recibido
+                  _buildReceivedMessage(
+                    text:
+                        '¡Hola! Acabo de finalizar los conceptos estructurales del proyecto Obsidian Tower. ¿Te gustaría revisar los renders 3D iniciales ahora?',
+                    time: '10:42 AM',
+                    isDark: isDark,
+                  ),
+                  SizedBox(height: 24.h),
+
+                  // Mensaje Enviado
+                  _buildSentMessage(
+                    text:
+                        'Suena perfecto, Julian. La precisión arquitectónica es exactamente lo que buscamos. Adelante, compártelos.',
+                    time: '10:42 AM',
+                    isRead: true,
+                    primaryColor: primaryColor,
+                  ),
+                  SizedBox(height: 24.h),
+
+                  // Mensaje Recibido con Tarjeta
+                  _buildCardMessage(
+                    time: '10:45 AM',
+                    isDark: isDark,
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 24.h),
-            Expanded(
-              child: userId == null
-                  ? const Center(
-                      child: Text('Inicia sesión para ver tus mensajes'))
-                  : FutureBuilder<List<dynamic>>(
-                      future: ref
-                          .read(chatRepositoryProvider)
-                          .getUserConversations(userId: userId),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-                        if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}'));
-                        }
-                        final convos = snapshot.data ?? [];
-                        if (convos.isEmpty) {
-                          return const Center(
-                              child: Text('Sin conversaciones'));
-                        }
-                        return ListView.builder(
-                          itemCount: convos.length,
-                          itemBuilder: (context, index) {
-                            final c = convos[index] as Map<String, dynamic>;
-                            final name = c['id'] as String;
-                            final last = c['message'] as String? ?? '';
-                            final unread = c['unreadCount'] as int? ?? 0;
-                            return ListTile(
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 24.w, vertical: 8.h),
-                              leading: CircleAvatar(
-                                  radius: 28.r,
-                                  child:
-                                      Text(name.substring(0, 2).toUpperCase())),
-                              title: Text(name,
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16.sp)),
-                              subtitle: Text(last,
-                                  maxLines: 1, overflow: TextOverflow.ellipsis),
-                              trailing: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(c['updated_at']?.toString() ?? '',
-                                      style: TextStyle(
-                                          color: Colors.grey, fontSize: 12.sp)),
-                                  if (unread > 0)
-                                    Container(
-                                      margin: EdgeInsets.only(top: 4.h),
-                                      padding: EdgeInsets.all(6.r),
-                                      decoration: BoxDecoration(
-                                          color: theme.colorScheme.secondary,
-                                          shape: BoxShape.circle),
-                                      child: Text(unread.toString(),
-                                          style: const TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.bold)),
-                                    )
-                                ],
-                              ),
-                              onTap: () {
-                                // abrir conversación - por ahora navegamos al perfil si es profesional
-                                context.push('/specialist/$name');
-                              },
-                            );
-                          },
-                        );
-                      },
-                    ),
-            ),
+            _buildBottomInput(isDark, primaryColor),
           ],
         ),
       ),
     );
   }
+
+  Widget _buildReceivedMessage({
+    required String text,
+    required String time,
+    required bool isDark,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: EdgeInsets.only(right: 60.w),
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey[800] : Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16.r),
+              topRight: Radius.circular(16.r),
+              bottomRight: Radius.circular(16.r),
+              bottomLeft: Radius.circular(4.r), // Punta de burbuja
+            ),
+            boxShadow: [
+              if (!isDark)
+                BoxShadow(
+                  color: Colors.black.withAlpha((0.03 * 255).round()),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+            ],
+          ),
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: isDark ? Colors.white : Colors.black87,
+              height: 1.5,
+            ),
+          ),
+        ),
+        SizedBox(height: 6.h),
+        Text(
+          time,
+          style: TextStyle(
+            fontSize: 10.sp,
+            color: Colors.grey[500],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSentMessage({
+    required String text,
+    required String time,
+    required bool isRead,
+    required Color primaryColor,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Container(
+          margin: EdgeInsets.only(left: 60.w),
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            color: primaryColor,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16.r),
+              topRight: Radius.circular(16.r),
+              bottomLeft: Radius.circular(16.r),
+              bottomRight: Radius.circular(4.r), // Punta de burbuja
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: primaryColor.withAlpha((0.3 * 255).round()),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.white,
+              height: 1.5,
+            ),
+          ),
+        ),
+        SizedBox(height: 6.h),
+        Text(
+          '$time - ${isRead ? 'LEÍDO' : 'ENVIADO'}',
+          style: TextStyle(
+            fontSize: 10.sp,
+            color: Colors.grey[500],
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCardMessage({
+    required String time,
+    required bool isDark,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: EdgeInsets.only(right: 40.w),
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey[800] : Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(16.r),
+              topRight: Radius.circular(16.r),
+              bottomRight: Radius.circular(16.r),
+              bottomLeft: Radius.circular(4.r),
+            ),
+            boxShadow: [
+              if (!isDark)
+                BoxShadow(
+                  color: Colors.black.withAlpha((0.03 * 255).round()),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Contenido de la Tarjeta
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[900] : const Color(0xFFF8F9FA),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(16.w),
+                      decoration: BoxDecoration(
+                        color:
+                            const Color(0xFFFFF0EC), // Fondo naranja muy claro
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: const Icon(
+                        Icons.image_outlined,
+                        color: Color(0xFFFFA58C),
+                        size: 32,
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'Vista del Proyecto',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
+                        color: isDark ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text(
+                      'Entrada del lobby',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                'Aquí tienes un adelanto de la entrada principal del lobby. Observa cómo el acabado de obsidiana interactúa con las matrices de luz lavanda.',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: isDark ? Colors.white : Colors.black87,
+                  height: 1.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 6.h),
+        Text(
+          time,
+          style: TextStyle(
+            fontSize: 10.sp,
+            color: Colors.grey[500],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomInput(bool isDark, Color primaryColor) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[900] : Colors.white,
+        border: Border(
+          top: BorderSide(
+            color: isDark ? Colors.white10 : Colors.black12,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.attach_file),
+              onPressed: () {},
+              color: Colors.grey[500],
+            ),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[800] : Colors.transparent,
+                  border: Border.all(
+                    color: isDark ? Colors.transparent : Colors.grey[300]!,
+                  ),
+                  borderRadius: BorderRadius.circular(24.r),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        decoration: InputDecoration(
+                          hintText: 'Escribe un mensaje...',
+                          hintStyle: TextStyle(color: Colors.grey[400]),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                        ),
+                      ),
+                    ),
+                    Icon(Icons.mic_none, color: Colors.grey[400], size: 20.r),
+                    SizedBox(width: 12.w),
+                    Icon(Icons.sentiment_satisfied_alt,
+                        color: Colors.grey[400], size: 20.r),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Container(
+              decoration: BoxDecoration(
+                color: primaryColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withAlpha((0.4 * 255).round()),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.send),
+                onPressed: () {},
+                color: Colors.white,
+                iconSize: 20.r,
+              ),
+            ),
+            SizedBox(width: 8.w),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DottedBackgroundPainter extends CustomPainter {
+  final Color color;
+
+  _DottedBackgroundPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.fill;
+
+    const spacing = 20.0;
+
+    for (double x = 0; x < size.width; x += spacing) {
+      for (double y = 0; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), 1.0, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

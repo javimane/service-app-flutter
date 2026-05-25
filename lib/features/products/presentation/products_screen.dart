@@ -1,112 +1,141 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/data/repositories/products_repository.dart';
+import 'widgets/product_card.dart';
 
-class ProductsScreen extends StatelessWidget {
+class ProductsScreen extends ConsumerStatefulWidget {
   const ProductsScreen({super.key});
+
+  @override
+  ConsumerState<ProductsScreen> createState() => _ProductsScreenState();
+}
+
+class _ProductsScreenState extends ConsumerState<ProductsScreen> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
+    final productsAsyncValue = ref.watch(productsProvider);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Productos',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp)),
-        centerTitle: true,
-        actions: [
-          IconButton(
-              icon: Icon(Icons.filter_list, size: 24.r), onPressed: () {}),
-        ],
-      ),
-      body: ListView.builder(
-        padding: EdgeInsets.all(16.w),
-        itemCount: 5, // Simulación de 5 productos
-        itemBuilder: (context, index) {
-          return Container(
-            margin: EdgeInsets.only(bottom: 16.h),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(16.r),
-              border:
-                  Border.all(color: isDark ? Colors.white10 : Colors.black12),
-              boxShadow: [
-                BoxShadow(
-                  color: isDark
-                      ? Colors.transparent
-                      : Colors.black.withAlpha(13),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              floating: false,
+              pinned: true,
+              elevation: 0,
+              backgroundColor: theme.scaffoldBackgroundColor,
+              title: Text('Productos',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp)),
+              centerTitle: true,
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.shopping_cart_outlined, size: 24.r),
+                  onPressed: () {},
                 ),
               ],
-            ),
-            child: Row(
-              children: [
-                // Imagen del producto simulada
-                ClipRRect(
-                  borderRadius:
-                      BorderRadius.horizontal(left: Radius.circular(16.r)),
-                  child: Container(
-                    width: 100.w,
-                    height: 100.h,
-                    color: theme.colorScheme.secondary.withAlpha(51),
-                    child: Icon(Icons.inventory_2_outlined,
-                        color: theme.colorScheme.secondary, size: 40.r),
+              bottom: PreferredSize(
+                preferredSize: Size.fromHeight(70.h),
+                child: Container(
+                  color: theme.scaffoldBackgroundColor,
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 40.h,
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.white10 : Colors.black.withAlpha(10),
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText: 'Buscar productos...',
+                              hintStyle: TextStyle(fontSize: 14.sp),
+                              prefixIcon: Icon(Icons.search, size: 20.r),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(vertical: 10.h),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Container(
+                        height: 40.h,
+                        width: 40.w,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: IconButton(
+                          icon: Icon(Icons.filter_list, color: Colors.white, size: 20.r),
+                          onPressed: () {
+                            // TODO: Show filters modal
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 12.h, horizontal: 8.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Producto de Ejemplo ${index + 1}',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16.sp),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          'Marca genérica • Stock: 10',
-                          style: TextStyle(
-                              color:
-                                  theme.colorScheme.onSurface.withAlpha(153),
-                              fontSize: 12.sp),
-                        ),
-                        SizedBox(height: 8.h),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              '\$2,500.00',
-                              style: TextStyle(
-                                  color: theme.colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18.sp),
-                            ),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 8.w, vertical: 4.h),
-                              decoration: BoxDecoration(
-                                  color: theme.colorScheme.primary,
-                                  borderRadius: BorderRadius.circular(8.r)),
-                              child: Icon(Icons.add_shopping_cart,
-                                  color: Colors.white, size: 16.r),
-                            ),
-                          ],
-                        ),
-                      ],
+              ),
+            ),
+            productsAsyncValue.when(
+              data: (products) {
+                if (products.isEmpty) {
+                  return SliverFillRemaining(
+                    child: Center(
+                      child: Text('No hay productos disponibles.'),
+                    ),
+                  );
+                }
+
+                return SliverPadding(
+                  padding: EdgeInsets.all(16.w),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 16.h,
+                      crossAxisSpacing: 16.w,
+                      childAspectRatio: 0.65, // Relación de aspecto para la tarjeta
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        return ProductCard(
+                          product: products[index],
+                          isListMode: false,
+                        );
+                      },
+                      childCount: products.length,
                     ),
                   ),
+                );
+              },
+              loading: () => SliverFillRemaining(
+                child: Center(
+                  child: CircularProgressIndicator(),
                 ),
-              ],
+              ),
+              error: (error, stack) => SliverFillRemaining(
+                child: Center(
+                  child: Text('Error al cargar productos: \$error'),
+                ),
+              ),
             ),
-          );
-        },
+          ],
+        ),
       ),
     );
   }

@@ -7,7 +7,7 @@ class ProvinceModel {
 
   factory ProvinceModel.fromJson(Map<String, dynamic> json) => ProvinceModel(
         id: json['id'] as int,
-        name: json['name'] as String,
+        name: json['name'] as String? ?? '',
         createdAt: json['created_at'] as String?,
       );
 
@@ -37,7 +37,7 @@ class ProvinceDepartmentModel {
       ProvinceDepartmentModel(
         id: json['id'] as int,
         provinceId: json['province_id'] as int,
-        name: json['name'] as String,
+        name: json['name'] as String? ?? '',
         createdAt: json['created_at'] as String?,
         province: json['Province'] != null
             ? ProvinceModel.fromJson(json['Province'] as Map<String, dynamic>)

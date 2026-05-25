@@ -7,7 +7,7 @@ class Province {
 
   factory Province.fromJson(Map<String, dynamic> json) => Province(
         id: json['id'] as int,
-        name: json['name'] as String,
+        name: json['name'] as String? ?? '',
         createdAt: json['created_at'] != null
             ? DateTime.parse(json['created_at'] as String)
             : null,
@@ -25,7 +25,7 @@ class Department {
 
   factory Department.fromJson(Map<String, dynamic> json) => Department(
         id: json['id'] as int,
-        name: json['name'] as String,
+        name: json['name'] as String? ?? '',
         createdAt: json['created_at'] != null
             ? DateTime.parse(json['created_at'] as String)
             : null,
@@ -199,7 +199,7 @@ class Company {
 
     return Company(
       id: json['id'] as int,
-      name: json['name'] as String,
+      name: json['name'] as String? ?? '',
       taxCode: json['tax_code'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.tryParse(json['created_at'] as String)

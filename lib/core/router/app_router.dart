@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:service_app_flutter/features/chat/presentation/conversations_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/home/presentation/main_scaffold.dart';
@@ -52,120 +53,126 @@ final appRouter = GoRouter(
           pageBuilder: (context, state) =>
               _fadeTransition(state, const HomeScreen()),
         ),
+        GoRoute(
+          path: '/categories',
+          pageBuilder: (context, state) =>
+              _slideTransition(state, const CategoriesScreen()),
+        ),
+        GoRoute(
+          path: '/services',
+          pageBuilder: (context, state) {
+            final categoryId = state.uri.queryParameters['categoryId'] != null
+                ? int.tryParse(state.uri.queryParameters['categoryId']!)
+                : null;
+            return _slideTransition(
+              state,
+              ServicesScreen(initialCategoryId: categoryId),
+            );
+          },
+        ),
+        GoRoute(
+          path: '/services/:id',
+          pageBuilder: (context, state) {
+            final id = int.parse(state.pathParameters['id']!);
+            return _slideTransition(state, ServiceDetailScreen(serviceId: id));
+          },
+        ),
+        GoRoute(
+          path: '/products',
+          pageBuilder: (context, state) {
+            return _slideTransition(
+              state,
+              const ProductsScreen(),
+            );
+          },
+        ),
+        GoRoute(
+          path: '/products/:id',
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return _slideTransition(state, ProductDetailScreen(productId: id));
+          },
+        ),
+        GoRoute(
+          path: '/reels',
+          pageBuilder: (context, state) =>
+              _slideTransition(state, const ReelsScreen()),
+        ),
+        GoRoute(
+          path: '/specialist/:id',
+          pageBuilder: (context, state) {
+            final id = int.tryParse(state.pathParameters['id'] ?? '');
+            if (id == null) {
+              return _slideTransition(state, const SpecialistProfileScreen());
+            }
+            return _slideTransition(
+              state,
+              ProfessionalStoreScreen(professionalId: id),
+            );
+          },
+        ),
+        GoRoute(
+          path: '/specialist',
+          pageBuilder: (context, state) =>
+              _slideTransition(state, const SpecialistProfileScreen()),
+        ),
+        GoRoute(
+          path: '/dashboard',
+          pageBuilder: (context, state) =>
+              _slideTransition(state, const DashboardMainScreen()),
+        ),
+        GoRoute(
+          path: '/favorites',
+          pageBuilder: (context, state) =>
+              _slideTransition(state, const FavoritesScreen()),
+        ),
+        GoRoute(
+          path: '/promotions',
+          pageBuilder: (context, state) =>
+              _slideTransition(state, const PromotionsScreen()),
+        ),
+        GoRoute(
+          path: '/bank-promotions',
+          pageBuilder: (context, state) =>
+              _slideTransition(state, const BankPromotionsScreen()),
+        ),
+        GoRoute(
+          path: '/bank-promotions/:id',
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return _slideTransition(state, BankPromotionDetailScreen(id: id));
+          },
+        ),
+        GoRoute(
+          path: '/plan-payment',
+          pageBuilder: (context, state) =>
+              _slideTransition(state, const PlanPaymentScreen()),
+        ),
+        GoRoute(
+          path: '/map',
+          pageBuilder: (context, state) =>
+              _slideTransition(state, const MapScreen()),
+        ),
+        GoRoute(
+          path: '/chat',
+          pageBuilder: (context, state) =>
+              _slideTransition(state, const ConversationsScreen()),
+        ),
+        GoRoute(
+          path: '/chat/:id',
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id']!;
+            final initialMessage = state.uri.queryParameters['initialMessage'];
+            return _slideTransition(
+                state, ChatScreen(chatId: id, initialMessage: initialMessage));
+          },
+        ),
+        GoRoute(
+          path: '/settings',
+          pageBuilder: (context, state) =>
+              _slideTransition(state, const SettingsScreen()),
+        ),
       ],
-    ),
-
-    // ─── Full screen routes ───────────────────────────────────────────────
-    GoRoute(
-      path: '/categories',
-      pageBuilder: (context, state) =>
-          _slideTransition(state, const CategoriesScreen()),
-    ),
-    GoRoute(
-      path: '/services',
-      pageBuilder: (context, state) {
-        final categoryId = state.uri.queryParameters['categoryId'] != null
-            ? int.tryParse(state.uri.queryParameters['categoryId']!)
-            : null;
-        return _slideTransition(
-          state,
-          ServicesScreen(initialCategoryId: categoryId),
-        );
-      },
-    ),
-    GoRoute(
-      path: '/services/:id',
-      pageBuilder: (context, state) {
-        final id = int.parse(state.pathParameters['id']!);
-        return _slideTransition(state, ServiceDetailScreen(serviceId: id));
-      },
-    ),
-    GoRoute(
-      path: '/products',
-      pageBuilder: (context, state) {
-        // El parámetro 'initialCategoryId' no existe en ProductsScreen
-        return _slideTransition(
-          state,
-          const ProductsScreen(),
-        );
-      },
-    ),
-    GoRoute(
-      path: '/products/:id',
-      pageBuilder: (context, state) {
-        final id = int.parse(state.pathParameters['id']!);
-        return _slideTransition(state, ProductDetailScreen(productId: id));
-      },
-    ),
-    GoRoute(
-      path: '/reels',
-      pageBuilder: (context, state) =>
-          _slideTransition(state, const ReelsScreen()),
-    ),
-    GoRoute(
-      path: '/specialist/:id',
-      pageBuilder: (context, state) {
-        final id = int.tryParse(state.pathParameters['id'] ?? '');
-        if (id == null) {
-          return _slideTransition(state, const SpecialistProfileScreen());
-        }
-        return _slideTransition(
-          state,
-          ProfessionalStoreScreen(professionalId: id),
-        );
-      },
-    ),
-    GoRoute(
-      path: '/specialist',
-      pageBuilder: (context, state) =>
-          _slideTransition(state, const SpecialistProfileScreen()),
-    ),
-    GoRoute(
-      path: '/dashboard',
-      pageBuilder: (context, state) =>
-          _slideTransition(state, const DashboardMainScreen()),
-    ),
-    GoRoute(
-      path: '/favorites',
-      pageBuilder: (context, state) =>
-          _slideTransition(state, const FavoritesScreen()),
-    ),
-    GoRoute(
-      path: '/promotions',
-      pageBuilder: (context, state) =>
-          _slideTransition(state, const PromotionsScreen()),
-    ),
-    GoRoute(
-      path: '/bank-promotions',
-      pageBuilder: (context, state) =>
-          _slideTransition(state, const BankPromotionsScreen()),
-    ),
-    GoRoute(
-      path: '/bank-promotions/:id',
-      pageBuilder: (context, state) {
-        final id = state.pathParameters['id']!;
-        return _slideTransition(state, BankPromotionDetailScreen(id: id));
-      },
-    ),
-    GoRoute(
-      path: '/plan-payment',
-      pageBuilder: (context, state) =>
-          _slideTransition(state, const PlanPaymentScreen()),
-    ),
-    GoRoute(
-      path: '/map',
-      pageBuilder: (context, state) =>
-          _slideTransition(state, const MapScreen()),
-    ),
-    GoRoute(
-      path: '/messages',
-      pageBuilder: (context, state) =>
-          _slideTransition(state, const ChatScreen()),
-    ),
-    GoRoute(
-      path: '/settings',
-      pageBuilder: (context, state) =>
-          _slideTransition(state, const SettingsScreen()),
     ),
   ],
 );

@@ -73,16 +73,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> login(String email, String password) async {
     state = state.copyWith(loading: true, error: null);
     try {
-      debugPrint('AuthNotifier.login: leyendo authRepositoryProvider');
-      late final dynamic repo;
-      try {
-        final repo = _repo;
-      } catch (e, st) {
-        debugPrint('AuthNotifier.login: error al leer provider -> $e');
-        debugPrint('$st');
-        rethrow;
-      }
-      debugPrint('AuthNotifier.login: repo obtenido, llamando repo.login');
+      debugPrint('AuthNotifier.login: usando _repo directamente');
       final resp = await _repo.login(email, password);
       debugPrint('AuthNotifier.login: _repo.login finalizado con exito');
       // save session
@@ -91,10 +82,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Supabase Login (Chat)
       try {
         debugPrint('AuthNotifier.login: Iniciando Supabase signInWithPassword');
-        await Supabase.instance.client.auth.signInWithPassword(
-          email: email,
-          password: password,
-        ).timeout(const Duration(seconds: 5));
+        await Supabase.instance.client.auth
+            .signInWithPassword(
+              email: email,
+              password: password,
+            )
+            .timeout(const Duration(seconds: 5));
         debugPrint('AuthNotifier.login: Supabase login exitoso');
       } catch (e) {
         debugPrint('Supabase login error: $e');
@@ -103,13 +96,18 @@ class AuthNotifier extends StateNotifier<AuthState> {
       // Firebase Token Registration (Push Notifications)
       try {
         debugPrint('AuthNotifier.login: Solicitando token de Firebase');
-        final token = await FirebaseMessaging.instance.getToken().timeout(const Duration(seconds: 5));
+        final token = await FirebaseMessaging.instance
+            .getToken()
+            .timeout(const Duration(seconds: 5));
         debugPrint('AuthNotifier.login: Token Firebase obtenido');
         if (token != null) {
           final platform =
               kIsWeb ? 'web' : (Platform.isIOS ? 'ios' : 'android');
-          await _repo.registerDeviceToken(token, platform).timeout(const Duration(seconds: 5));
-          debugPrint('AuthNotifier.login: Token Firebase registrado en backend');
+          await _repo
+              .registerDeviceToken(token, platform)
+              .timeout(const Duration(seconds: 5));
+          debugPrint(
+              'AuthNotifier.login: Token Firebase registrado en backend');
         }
       } catch (e) {
         debugPrint('Firebase token registration error: $e');
