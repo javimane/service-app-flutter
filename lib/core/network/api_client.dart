@@ -35,9 +35,17 @@ class ApiClient {
         if (sessionString != null) {
           try {
             final sessionMap = jsonDecode(sessionString);
+            String? token;
             if (sessionMap['access_token'] != null) {
-              options.headers['Authorization'] =
-                  'Bearer ${sessionMap['access_token']}';
+              token = sessionMap['access_token'];
+            } else if (sessionMap['data'] != null && sessionMap['data']['session'] != null) {
+              token = sessionMap['data']['session']['access_token'];
+            } else if (sessionMap['session'] != null) {
+              token = sessionMap['session']['access_token'];
+            }
+
+            if (token != null) {
+              options.headers['Authorization'] = 'Bearer $token';
             }
           } catch (_) {}
         }
