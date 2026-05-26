@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:service_app_flutter/data/services/alert_service.dart';
 
 String _getBaseUrl() {
   if (kIsWeb) return 'http://localhost:3000/api';
@@ -38,7 +39,8 @@ class ApiClient {
             String? token;
             if (sessionMap['access_token'] != null) {
               token = sessionMap['access_token'];
-            } else if (sessionMap['data'] != null && sessionMap['data']['session'] != null) {
+            } else if (sessionMap['data'] != null &&
+                sessionMap['data']['session'] != null) {
               token = sessionMap['data']['session']['access_token'];
             } else if (sessionMap['session'] != null) {
               token = sessionMap['session']['access_token'];
@@ -59,7 +61,35 @@ class ApiClient {
         return handler.next(options);
       },
       onError: (DioException error, handler) {
-        // Log or handle global errors here
+        // Extract a user-friendly message from the API error and show it
+        try {
+          String? message;
+          final resp = error.response?.data;
+          if (resp != null) {
+            if (resp is Map && resp['message'] != null) {
+              message = resp['message'].toString();
+            } else if (resp is String) {
+              // Sometimes the response body is a JSON-encoded string
+              try {
+                final decoded = jsonDecode(resp);
+                if (decoded is Map && decoded['message'] != null) {
+                  message = decoded['message'].toString();
+                } else {
+                  message = resp;
+                }
+              } catch (_) {
+                message = resp;
+              }
+            }
+          }
+
+          // Fallback to DioException message
+          message ??= error.message;
+
+          if (message != null && message.isNotEmpty) {
+            AlertService.showError(message);
+          }
+        } catch (_) {}
         return handler.next(error);
       },
     ));

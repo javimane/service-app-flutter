@@ -37,19 +37,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _loading = true);
     final router = GoRouter.of(context);
 
-    try {
-      await ref
-          .read(authNotifierProvider.notifier)
-          .login(_emailCtrl.text.trim(), _passwordCtrl.text);
-      if (!mounted) return;
-      router.go('/home');
-    } catch (e) {
-      if (mounted) {
-        AlertService.showError('Error: ${e.toString()}');
+    await ref
+        .read(authNotifierProvider.notifier)
+        .login(_emailCtrl.text.trim(), _passwordCtrl.text);
+    final authState = ref.read(authNotifierProvider);
+    if (mounted) {
+      // If there was an error, ApiClient interceptor already shows it via AlertService.
+      if (authState.error != null) {
+        // no-op: avoid duplicate alerts
+      } else if (authState.session != null && authState.authenticated) {
+        // Only navigate when we have a valid session and authenticated flag
+        AlertService.showSuccess('¡Bienvenido de nuevo!');
+        router.go('/home');
+      } else {
+        // session is null -> do not navigate to home
       }
-    } finally {
-      if (mounted) setState(() => _loading = false);
     }
+    if (mounted) setState(() => _loading = false);
   }
 
   @override
@@ -173,47 +177,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20))))),
                 const SizedBox(width: 16),
-                Expanded(
-                    child: OutlinedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.facebook, size: 20),
-                        label: const Text('FACEBOOK'),
-                        style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            foregroundColor:
-                                isDark ? Colors.white : Colors.black,
-                            side: BorderSide(
-                                color:
-                                    isDark ? Colors.white10 : Colors.black12),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20))))),
               ]),
               const SizedBox(height: 16),
-              Center(
-                child: TextButton(
-                  onPressed: _loading
-                      ? null
-                      : () async {
-                          final router = GoRouter.of(context);
-                          setState(() => _loading = true);
-                          try {
-                            await ref
-                                .read(authNotifierProvider.notifier)
-                                .login('test1@test.com', 'Test2026');
-                            if (!mounted) return;
-                            router.go('/home');
-                          } catch (e) {
-                            if (mounted) {
-                              AlertService.showError(
-                                  'Error test login: ${e.toString()}');
-                            }
-                          } finally {
-                            if (mounted) setState(() => _loading = false);
-                          }
-                        },
-                  child: const Text('Login de prueba'),
-                ),
-              ),
               const SizedBox(height: 48),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                 Text('¿No tienes una cuenta? ',

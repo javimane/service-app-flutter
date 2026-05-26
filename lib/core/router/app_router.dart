@@ -39,6 +39,7 @@ import '../../features/dashboard/presentation/screens/subscription_screen.dart';
 import '../../features/dashboard/presentation/screens/referrals_screen.dart';
 import '../../features/dashboard/presentation/screens/bank_promotions_management_screen.dart';
 import '../../core/widgets/subscription_wrapper.dart';
+import '../../core/widgets/plan_guard.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GlobalKey<NavigatorState> _shellNavigatorKey =
@@ -223,29 +224,29 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/dashboard/promotions',
       pageBuilder: (context, state) =>
-          _slideTransition(state, const SubscriptionWrapper(child: DashboardPromotionsScreen())),
+           _slideTransition(state, const PlanGuard(allowedPlans: ['standard', 'premium'], child: DashboardPromotionsScreen())),
     ),
     // Group 2 – Products, Services, Reels
     GoRoute(
       path: '/dashboard/products',
       pageBuilder: (context, state) =>
-          _slideTransition(state, const DashboardProductsScreen()),
+          _slideTransition(state, const SubscriptionWrapper(child: DashboardProductsScreen())),
     ),
     GoRoute(
       path: '/dashboard/services',
       pageBuilder: (context, state) =>
-          _slideTransition(state, const DashboardServicesScreen()),
+          _slideTransition(state, const SubscriptionWrapper(child: DashboardServicesScreen())),
     ),
     GoRoute(
       path: '/dashboard/reels',
       pageBuilder: (context, state) =>
-          _slideTransition(state, const SubscriptionWrapper(child: DashboardReelsScreen())),
+           _slideTransition(state, const PlanGuard(allowedPlans: ['standard', 'premium'], child: DashboardReelsScreen())),
     ),
     // Group 3 – Calendar, Notifications, Profile, Subscription, Referrals, Bank Promotions
     GoRoute(
       path: '/dashboard/calendar',
       pageBuilder: (context, state) =>
-          _slideTransition(state, const SubscriptionWrapper(child: DashboardCalendarScreen())),
+           _slideTransition(state, const PlanGuard(allowedPlans: ['standard', 'premium'], child: DashboardCalendarScreen())),
     ),
     GoRoute(
       path: '/dashboard/notifications',
@@ -255,7 +256,7 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/dashboard/profile',
       pageBuilder: (context, state) =>
-          _slideTransition(state, const DashboardProfileScreen()),
+           _slideTransition(state, const PlanGuard(allowedPlans: ['free', 'standard', 'premium'], requireProfessional: true, child: DashboardProfileScreen())),
     ),
     GoRoute(
       path: '/dashboard/subscription',
@@ -270,7 +271,7 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/dashboard/bank-promotions',
       pageBuilder: (context, state) =>
-          _slideTransition(state, const SubscriptionWrapper(child: DashboardBankPromotionsScreen())),
+          _slideTransition(state, const PlanGuard(allowedPlans: ['standard', 'premium'], child: DashboardBankPromotionsScreen())),
     ),
   ],
 );

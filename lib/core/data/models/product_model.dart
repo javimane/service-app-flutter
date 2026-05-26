@@ -162,6 +162,9 @@ class ProductModel {
   final String? professionalName; // convenience
   final bool isActive;
   final int? stock;
+  final String? linkUrl;
+  final String? currencyCode;
+  final int? percentDiscount;
 
   ProductModel({
     required this.id,
@@ -183,6 +186,9 @@ class ProductModel {
     this.professionalName,
     this.isActive = true,
     this.stock,
+    this.linkUrl,
+    this.currencyCode,
+    this.percentDiscount,
   });
 
   String? get imageUrl => images.isNotEmpty ? images.first.imageUrl : null;
@@ -258,6 +264,9 @@ class ProductModel {
           true,
       stock: (json['stock'] as int?) ??
           (profProds.isNotEmpty ? profProds.first.stock : null),
+      linkUrl: product['link_url'] as String?,
+      currencyCode: product['currency_code'] as String?,
+      percentDiscount: product['percent_discount'] as int?,
     );
   }
 }

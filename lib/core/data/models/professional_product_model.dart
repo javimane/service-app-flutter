@@ -9,6 +9,10 @@ class ProfessionalProductModel {
   final String saleType;
   final bool? isActive;
   final int? stock;
+  final double? offerPrice;
+  final String? currencyCode;
+  final int? percentDiscount;
+  final String? linkUrl;
   final String? createdAt;
   final String? updatedAt;
   final ProfessionalModel? professional;
@@ -22,6 +26,10 @@ class ProfessionalProductModel {
     required this.saleType,
     this.isActive,
     this.stock,
+    this.offerPrice,
+    this.currencyCode,
+    this.percentDiscount,
+    this.linkUrl,
     this.createdAt,
     this.updatedAt,
     this.professional,
@@ -37,6 +45,10 @@ class ProfessionalProductModel {
         saleType: json['sale_type'] as String? ?? '',
         isActive: json['is_active'] as bool?,
         stock: json['stock'] as int?,
+        offerPrice: (json['offer_price'] as num?)?.toDouble() ?? 0.0,
+        currencyCode: json['currency_code'] as String?,
+        percentDiscount: json['percent_discount'] as int?,
+        linkUrl: json['link_url'] as String?,
         createdAt: json['created_at'] as String?,
         updatedAt: json['updated_at'] as String?,
         professional: json['Professional'] != null

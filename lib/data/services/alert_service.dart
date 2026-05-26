@@ -32,23 +32,23 @@ class AlertService {
 
   /// Muestra un toast de error con fondo rojo y icono de advertencia.
   static void showError(String message) {
-    messengerKey.currentState?.showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.warning_amber_rounded, color: Colors.white),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(message,
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold)),
-            ),
-          ],
-        ),
+    // Hide any current banner before showing a new one
+    messengerKey.currentState?.hideCurrentMaterialBanner();
+
+    messengerKey.currentState?.showMaterialBanner(
+      MaterialBanner(
+        leading: const Icon(Icons.warning_amber_rounded, color: Colors.white),
+        content: Text(message,
+            style: const TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: AppTheme.errorRed,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(seconds: 4),
+        actions: [
+          TextButton(
+            onPressed: () =>
+                messengerKey.currentState?.hideCurrentMaterialBanner(),
+            child: const Text('Cerrar', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }

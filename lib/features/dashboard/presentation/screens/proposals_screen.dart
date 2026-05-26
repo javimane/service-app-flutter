@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/data/providers/session_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:service_app_flutter/core/data/repositories/professional_proposals_repository.dart';
 import 'package:service_app_flutter/core/data/repositories/storage_repository.dart';
@@ -84,6 +85,8 @@ class _DashboardProposalsScreenState
     final isLoading = ref.watch(_proposalsLoadingProvider);
     final received = ref.watch(_receivedProposalsProvider);
     final sent = ref.watch(_sentProposalsProvider);
+    final session = ref.watch(sessionInfoProvider);
+    final bool canCreateProposal = session.isActive && (session.plan == 'standard' || session.plan == 'premium');
     final current = activeTab == 'received' ? received : sent;
 
     return Scaffold(
@@ -102,12 +105,13 @@ class _DashboardProposalsScreenState
         backgroundColor: theme.colorScheme.surface,
         elevation: 0,
         actions: [
-          IconButton(
-            onPressed: () => _showCreateProposalSheet(context),
-            icon: Icon(Icons.add_rounded,
-                color: theme.colorScheme.primary, size: 24.r),
-            tooltip: 'Nuevo Presupuesto',
-          ),
+          if (canCreateProposal)
+            IconButton(
+              onPressed: () => _showCreateProposalSheet(context),
+              icon: Icon(Icons.add_rounded,
+                  color: theme.colorScheme.primary, size: 24.r),
+              tooltip: 'Nuevo Presupuesto',
+            ),
         ],
       ),
       body: Column(
@@ -164,11 +168,13 @@ class _DashboardProposalsScreenState
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showCreateProposalSheet(context),
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Nuevo Presupuesto'),
-      ),
+      floatingActionButton: canCreateProposal
+          ? FloatingActionButton.extended(
+              onPressed: () => _showCreateProposalSheet(context),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Nuevo Presupuesto'),
+            )
+          : null,
     );
   }
 

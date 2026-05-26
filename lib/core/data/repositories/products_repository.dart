@@ -60,6 +60,70 @@ class ProductsRepository {
         .map((e) => CategoryModel.fromJson(Map<String, dynamic>.from(e as Map)))
         .toList();
   }
+
+  Future<Map<String, dynamic>> createProduct(Map<String, dynamic> data) async {
+    final response = await _client.post(ApiConstants.products, data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> assignProductToProfessional(
+      Map<String, dynamic> data) async {
+    final response = await _client.post(
+      '${ApiConstants.products}/assign-professional',
+      data: data,
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> updateProfessionalProduct(
+      int professionalId, String productId, Map<String, dynamic> updates) async {
+    final response = await _client.put(
+      '${ApiConstants.products}/professional/$professionalId/product/$productId',
+      data: updates,
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<void> unassignProductFromProfessional(
+      String productId, int professionalId) async {
+    await _client.delete(
+      '${ApiConstants.products}/$productId/professional/$professionalId',
+    );
+  }
+
+  Future<Map<String, dynamic>> massUpdateProductPrices(
+      Map<String, dynamic> data) async {
+    final response = await _client.put(
+      '${ApiConstants.products}/mass-update-prices',
+      data: data,
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<ProductModel?> getProductByEan(String ean,
+      {int? professionalId}) async {
+    final params = <String, dynamic>{};
+    if (professionalId != null) {
+      params['professionalId'] = professionalId.toString();
+    }
+    try {
+      final response = await _client.get(
+        '${ApiConstants.products}/ean/$ean',
+        queryParameters: params,
+      );
+      if (response.data == null) return null;
+      // Depending on backend, it might return a list or a single object. 
+      // Assuming a single object based on web DashboardProducts implementation.
+      final raw = response.data;
+      if (raw is List) {
+        if (raw.isEmpty) return null;
+        return ProductModel.fromJson(raw.first as Map<String, dynamic>);
+      }
+      return ProductModel.fromJson(raw as Map<String, dynamic>);
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 final productsRepositoryProvider = Provider<ProductsRepository>((ref) {

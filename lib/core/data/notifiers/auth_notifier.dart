@@ -116,7 +116,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = state.copyWith(loading: false, session: resp, error: null);
     } catch (e) {
       state = state.copyWith(loading: false, error: e.toString());
-      rethrow;
+      // Do not rethrow; error will be shown in UI via state.error
     }
   }
 
