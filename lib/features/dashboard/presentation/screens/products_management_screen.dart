@@ -14,6 +14,7 @@ import '../../../../core/data/repositories/categories_repository.dart';
 import '../../../../core/data/repositories/products_repository.dart';
 import '../../../../core/data/repositories/storage_repository.dart';
 import '../../../../core/services/upload_service.dart';
+import '../../../../core/widgets/app_dropdown.dart';
 
 // ─── Providers ─────────────────────────────────────────────────────────────
 
@@ -200,49 +201,39 @@ class _DashboardProductsScreenState
             child: Row(
               children: [
                 Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: catFilter.isEmpty ? null : catFilter,
-                    hint: const Text('Categoría'),
+                  child: AppDropdown<String>(
+                    value: catFilter.isEmpty ? '' : catFilter,
+                    hint: 'Categoría',
                     isExpanded: true,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: theme.colorScheme.surface,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide.none),
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                    ),
                     items: [
-                      const DropdownMenuItem(value: '', child: Text('Todas')),
-                      ...categories.map((c) => DropdownMenuItem(
-                          value: c.name, child: Text(c.name))),
+                      const AppDropdownItem(value: '', label: 'Todas'),
+                      ...categories.map((c) => AppDropdownItem(
+                          value: c.name, label: c.name)),
                     ],
                     onChanged: (v) => ref
                         .read(_prodCategoryFilterProvider.notifier)
-                        .state = v ?? '',
+                        .state = v,
                   ),
                 ),
                 SizedBox(width: 8.w),
-                DropdownButton<String>(
+                AppDropdown<String>(
                   value: sortField,
-                  underline: const SizedBox(),
                   icon: Row(
                     children: [
-                      Icon(sortAsc ? Icons.arrow_upward : Icons.arrow_downward, size: 16.r),
-                      const Icon(Icons.sort),
+                      Icon(sortAsc ? Icons.arrow_upward : Icons.arrow_downward, size: 16.r, color: Colors.grey),
+                      const Icon(Icons.sort, color: Colors.grey),
                     ],
                   ),
                   items: const [
-                    DropdownMenuItem(value: 'title', child: Text('Título')),
-                    DropdownMenuItem(value: 'price', child: Text('Precio')),
-                    DropdownMenuItem(value: 'stock', child: Text('Stock')),
+                    AppDropdownItem(value: 'title', label: 'Título'),
+                    AppDropdownItem(value: 'price', label: 'Precio'),
+                    AppDropdownItem(value: 'stock', label: 'Stock'),
                   ],
                   onChanged: (v) {
                     if (v == sortField) {
                       ref.read(_prodSortDirProvider.notifier).state = !sortAsc;
                     } else {
-                      ref.read(_prodSortFieldProvider.notifier).state = v!;
+                      ref.read(_prodSortFieldProvider.notifier).state = v;
                       ref.read(_prodSortDirProvider.notifier).state = true;
                     }
                   },

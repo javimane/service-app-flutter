@@ -13,13 +13,17 @@ class MainScaffold extends ConsumerStatefulWidget {
 
 class _MainScaffoldState extends ConsumerState<MainScaffold> {
   int get _currentIndex {
-    final location = GoRouterState.of(context).uri.toString();
-    if (location.startsWith('/home')) return 0;
-    if (location.startsWith('/categories')) return 1;
-    if (location.startsWith('/map')) return 2;
-    if (location.startsWith('/reels')) return 3;
-    if (location.startsWith('/chat')) return 4;
-    if (location.startsWith('/menu')) return 5;
+    try {
+      final location = GoRouterState.of(context).uri.toString();
+      if (location.startsWith('/home')) return 0;
+      if (location.startsWith('/categories')) return 1;
+      if (location.startsWith('/map')) return 2;
+      if (location.startsWith('/reels')) return 3;
+      if (location.startsWith('/chat')) return 4;
+      if (location.startsWith('/menu')) return 5;
+    } catch (_) {
+      // Ignorar si no está en el contexto de GoRouter (ej. cuando se usa Navigator.push)
+    }
     return 0; // Default
   }
 

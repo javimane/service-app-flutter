@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:service_app_flutter/core/data/repositories/professional_promotions_repository.dart';
 import 'package:service_app_flutter/core/data/repositories/storage_repository.dart';
 import 'package:service_app_flutter/core/services/upload_service.dart';
+import 'package:service_app_flutter/core/widgets/app_dropdown.dart';
 
 // ─── Models ─────────────────────────────────────────────────────────────────
 
@@ -749,24 +750,17 @@ class _PromotionFormState extends ConsumerState<_PromotionForm> {
           SizedBox(height: 6.h),
           Container(
             width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 14.w),
-            decoration: BoxDecoration(
-              border: Border.all(
-                  color: isDark ? Colors.white10 : Colors.black.withAlpha(20)),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _discountType,
-                items: _discountTypes
-                    .map((t) => DropdownMenuItem<String>(
-                          value: t['value'],
-                          child: Text(t['label']!),
-                        ))
-                    .toList(),
-                onChanged: (v) =>
-                    setState(() => _discountType = v ?? 'percentage'),
-              ),
+            child: AppDropdown<String>(
+              isExpanded: true,
+              value: _discountType,
+              items: _discountTypes
+                  .map((t) => AppDropdownItem<String>(
+                        value: t['value']!,
+                        label: t['label']!,
+                      ))
+                  .toList(),
+              onChanged: (v) =>
+                  setState(() => _discountType = v),
             ),
           ),
 

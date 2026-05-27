@@ -2,9 +2,9 @@ import 'professional_model.dart';
 import 'product_model.dart';
 
 class ProfessionalProductModel {
-  final int id;
+  final String id;
   final int professionalId;
-  final int productId;
+  final String productId;
   final double price;
   final String saleType;
   final bool? isActive;
@@ -38,9 +38,9 @@ class ProfessionalProductModel {
 
   factory ProfessionalProductModel.fromJson(Map<String, dynamic> json) =>
       ProfessionalProductModel(
-        id: json['id'] as int,
+        id: json['id']?.toString() ?? '',
         professionalId: json['professional_id'] as int,
-        productId: json['product_id'] as int,
+        productId: json['product_id']?.toString() ?? '',
         price: (json['price'] as num?)?.toDouble() ?? 0.0,
         saleType: json['sale_type'] as String? ?? '',
         isActive: json['is_active'] as bool?,

@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:cookie_jar/cookie_jar.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:service_app_flutter/data/services/alert_service.dart';
+import 'package:service_app_flutter/core/router/app_router.dart';
 
 String _getBaseUrl() {
   if (kIsWeb) return 'http://localhost:3000/api';
@@ -15,6 +19,7 @@ String _getBaseUrl() {
 
 class ApiClient {
   late final Dio _dio;
+  late CookieJar _cookieJar = CookieJar();
   String? _apiKey;
 
   ApiClient() {
@@ -28,6 +33,12 @@ class ApiClient {
       },
     ));
 
+    // Cookie manager to capture/send cookies (access_token / refresh_token)
+    _dio.interceptors.add(CookieManager(_cookieJar));
+
+    // Initialize persistent cookie jar in background (will replace memory jar)
+    _initPersistCookieJar();
+
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
         // Add Authorization header if session exists in storage
@@ -37,19 +48,94 @@ class ApiClient {
           try {
             final sessionMap = jsonDecode(sessionString);
             String? token;
+
+            // Busca el token en distintas estructuras posibles
             if (sessionMap['access_token'] != null) {
               token = sessionMap['access_token'];
-            } else if (sessionMap['data'] != null &&
-                sessionMap['data']['session'] != null) {
-              token = sessionMap['data']['session']['access_token'];
-            } else if (sessionMap['session'] != null) {
-              token = sessionMap['session']['access_token'];
+            } else if (sessionMap['token'] != null) {
+              token = sessionMap['token'];
+            } else if (sessionMap['data'] != null) {
+              if (sessionMap['data']['access_token'] != null) {
+                token = sessionMap['data']['access_token'];
+              } else if (sessionMap['data']['token'] != null) {
+                token = sessionMap['data']['token'];
+              } else if (sessionMap['data']['session'] != null) {
+                token = sessionMap['data']['session']['access_token'] ??
+                    sessionMap['data']['session']['token'];
+              }
+            }
+
+            if (token == null && sessionMap['session'] != null) {
+              token = sessionMap['session']['access_token'] ??
+                  sessionMap['session']['token'];
             }
 
             if (token != null) {
-              options.headers['Authorization'] = 'Bearer $token';
+              try {
+                token = token.toString().trim();
+                // Avoid double 'Bearer ' prefix (accept tokens that already include it)
+                final headerValue = token.toLowerCase().startsWith('bearer ')
+                    ? token
+                    : 'Bearer $token';
+
+                // Log a masked sample for debugging (don't print full token)
+                String masked;
+                if (token.length > 8) {
+                  masked =
+                      '${token.substring(0, 4)}...${token.substring(token.length - 4)}';
+                } else {
+                  masked = '***';
+                }
+                debugPrint(
+                    'ApiClient Interceptor: setting Authorization header, token sample: $masked');
+
+                options.headers['Authorization'] = headerValue;
+              } catch (e) {
+                debugPrint('ApiClient Interceptor token handling error: $e');
+              }
+            } else {
+              debugPrint(
+                  'ApiClient Interceptor: No token found in sessionMap! Keys: ${sessionMap.keys}');
             }
-          } catch (_) {}
+          } catch (e) {
+            debugPrint('ApiClient Interceptor error: $e');
+          }
+        }
+
+        // If no token in secure storage, try to read cookie set by server
+        if (sessionString == null) {
+          try {
+            // Build request URI for cookie lookup
+            final base = _dio.options.baseUrl ?? '';
+            final path = options.path.startsWith('/')
+                ? options.path
+                : '/${options.path}';
+            final uri = Uri.parse('$base$path');
+            List<Cookie> cookiesList = <Cookie>[];
+            try {
+              // `loadForRequest` may return List<Cookie> or Future<List<Cookie>>
+              // Use Future.value to normalize both cases to a Future.
+              final raw = await Future.value(_cookieJar.loadForRequest(uri));
+              cookiesList = List<Cookie>.from(raw ?? <Cookie>[]);
+            } catch (e) {
+              debugPrint('ApiClient cookie load error: $e');
+            }
+
+            for (final c in cookiesList) {
+              if (c.name == 'access_token' && c.value.isNotEmpty) {
+                final token = c.value.trim();
+                final headerValue = token.toLowerCase().startsWith('bearer ')
+                    ? token
+                    : 'Bearer $token';
+                options.headers['Authorization'] = headerValue;
+                debugPrint(
+                    'ApiClient: using access_token from cookie (masked)');
+                break;
+              }
+            }
+          } catch (e) {
+            debugPrint('ApiClient cookie read error: $e');
+          }
         }
         // Attach API key header if configured and not already provided
         if (_apiKey != null &&
@@ -60,7 +146,7 @@ class ApiClient {
         }
         return handler.next(options);
       },
-      onError: (DioException error, handler) {
+      onError: (DioException error, handler) async {
         // Extract a user-friendly message from the API error and show it
         try {
           String? message;
@@ -86,6 +172,56 @@ class ApiClient {
           // Fallback to DioException message
           message ??= error.message;
 
+          // If the server indicates the token is expired, try refresh first
+          final lower = message?.toLowerCase() ?? '';
+          final isAuthError = lower.contains('expired') ||
+              lower.contains('token is expired') ||
+              error.response?.statusCode == 401;
+
+          final reqOpts = error.requestOptions;
+          final alreadyRetried = reqOpts.extra['retried'] == true;
+
+          if (isAuthError && !alreadyRetried) {
+            try {
+              // Attempt refresh using a separate Dio instance but shared CookieJar
+              final refreshDio = Dio(BaseOptions(
+                baseUrl: _dio.options.baseUrl,
+                connectTimeout: const Duration(seconds: 10),
+                receiveTimeout: const Duration(seconds: 10),
+                headers: {'Content-Type': 'application/json'},
+              ));
+              refreshDio.interceptors.add(CookieManager(_cookieJar));
+
+              // Call refresh endpoint; server will read cookie or body
+              final refreshResp = await refreshDio.post('/auth/refresh');
+              if (refreshResp.statusCode == 200) {
+                // Retry original request once; onRequest will pick new cookie
+                reqOpts.extra['retried'] = true;
+                try {
+                  final retryResp = await _dio.fetch(reqOpts);
+                  return handler.resolve(retryResp);
+                } catch (e) {
+                  // If retry fails, fallthrough to showing error
+                }
+              }
+            } catch (e) {
+              debugPrint('ApiClient refresh error: $e');
+            }
+
+            // Refresh didn't succeed: clear stored session, show message and navigate to login
+            try {
+              const storage = FlutterSecureStorage();
+              await storage.delete(key: 'auth_session');
+            } catch (_) {}
+
+            AlertService.showError(
+                'Sesión expirada. Por favor inicia sesión de nuevo.');
+            try {
+              appRouter.go('/login');
+            } catch (_) {}
+            return handler.next(error);
+          }
+
           if (message != null && message.isNotEmpty) {
             AlertService.showError(message);
           }
@@ -103,6 +239,22 @@ class ApiClient {
       responseBody: true,
       error: true,
     ));
+  }
+
+  Future<void> _initPersistCookieJar() async {
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final storagePath = '${dir.path}${Platform.pathSeparator}.cookies';
+      final persist = PersistCookieJar(storage: FileStorage(storagePath));
+
+      // Replace in-memory jar with persistent one and update interceptor
+      _cookieJar = persist;
+      _dio.interceptors.removeWhere((i) => i is CookieManager);
+      _dio.interceptors.add(CookieManager(_cookieJar));
+      debugPrint('ApiClient: PersistCookieJar initialized at $storagePath');
+    } catch (e) {
+      debugPrint('ApiClient: could not initialize PersistCookieJar: $e');
+    }
   }
 
   Dio get dio => _dio;

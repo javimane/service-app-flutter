@@ -1,13 +1,13 @@
-import 'dart:io';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/data/providers/session_provider.dart';
-import 'package:image_picker/image_picker.dart';
+import '../../../../data/services/alert_service.dart';
 import 'package:service_app_flutter/core/data/repositories/professional_proposals_repository.dart';
-import 'package:service_app_flutter/core/data/repositories/storage_repository.dart';
-import 'package:service_app_flutter/core/services/upload_service.dart';
+import 'proposal_creator_screen.dart';
 
 // ─── Providers ─────────────────────────────────────────────────────────────
 
@@ -40,12 +40,35 @@ class _DashboardProposalsScreenState
       final repo = ref.read(professionalProposalsRepositoryProvider);
       final received = await repo.getReceived();
       final sent = await repo.getSent();
+
+      List<dynamic> _extractList(dynamic resp) {
+        if (resp == null) return [];
+        // If API returns a map with `data` field
+        if (resp is Map) {
+          final data = resp['data'];
+          if (data is List) return data;
+          if (data is Map) return [data];
+        }
+        // If it's already a list
+        if (resp is List) return resp;
+        // If it's a JSON-encoded string, try to decode
+        if (resp is String) {
+          try {
+            final decoded = jsonDecode(resp);
+            return _extractList(decoded);
+          } catch (_) {
+            return [];
+          }
+        }
+        return [];
+      }
+
       ref.read(_receivedProposalsProvider.notifier).state =
-          (received?['data'] as List?) ?? [];
-      ref.read(_sentProposalsProvider.notifier).state =
-          (sent?['data'] as List?) ?? [];
+          _extractList(received);
+      ref.read(_sentProposalsProvider.notifier).state = _extractList(sent);
     } catch (e) {
       debugPrint('Error loading proposals: $e');
+      AlertService.showError('Error cargando presupuestos: ${e.toString()}');
     } finally {
       ref.read(_proposalsLoadingProvider.notifier).state = false;
     }
@@ -86,7 +109,8 @@ class _DashboardProposalsScreenState
     final received = ref.watch(_receivedProposalsProvider);
     final sent = ref.watch(_sentProposalsProvider);
     final session = ref.watch(sessionInfoProvider);
-    final bool canCreateProposal = session.isActive && (session.plan == 'standard' || session.plan == 'premium');
+    final bool canCreateProposal = session.isActive &&
+        (session.plan == 'standard' || session.plan == 'premium');
     final current = activeTab == 'received' ? received : sent;
 
     return Scaffold(
@@ -126,9 +150,8 @@ class _DashboardProposalsScreenState
                   label: 'Recibidos',
                   count: received.length,
                   isActive: activeTab == 'received',
-                  onTap: () =>
-                      ref.read(_proposalsTabProvider.notifier).state =
-                          'received',
+                  onTap: () => ref.read(_proposalsTabProvider.notifier).state =
+                      'received',
                 ),
                 SizedBox(width: 10.w),
                 _TabChip(
@@ -179,12 +202,10 @@ class _DashboardProposalsScreenState
   }
 
   void _showCreateProposalSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => const _CreateProposalSheet(),
-    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ProposalCreatorScreen()),
+    ).then((_) => _loadProposals());
   }
 }
 
@@ -212,9 +233,8 @@ class _TabChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isActive
-              ? theme.colorScheme.primary
-              : theme.colorScheme.surface,
+          color:
+              isActive ? theme.colorScheme.primary : theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
             color: isActive
@@ -234,8 +254,7 @@ class _TabChip extends StatelessWidget {
             ),
             SizedBox(width: 6.w),
             Container(
-              padding:
-                  EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+              padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
               decoration: BoxDecoration(
                 color: isActive
                     ? Colors.white.withAlpha(60)
@@ -247,9 +266,7 @@ class _TabChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.bold,
-                  color: isActive
-                      ? Colors.white
-                      : theme.colorScheme.primary,
+                  color: isActive ? Colors.white : theme.colorScheme.primary,
                 ),
               ),
             ),
@@ -283,10 +300,7 @@ class _ProposalCard extends StatelessWidget {
         : (proposal['sent_to'] ?? 'Usuario');
     final dateRaw = proposal['created_at'] as String?;
     final date = dateRaw != null
-        ? DateTime.tryParse(dateRaw)
-            ?.toLocal()
-            .toString()
-            .substring(0, 10) ??
+        ? DateTime.tryParse(dateRaw)?.toLocal().toString().substring(0, 10) ??
             dateRaw
         : '—';
 
@@ -329,9 +343,7 @@ class _ProposalCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isReceived
-                            ? 'Recibido de: $name'
-                            : 'Enviado a: $name',
+                        isReceived ? 'Recibido de: $name' : 'Enviado a: $name',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14.sp,
@@ -339,16 +351,15 @@ class _ProposalCard extends StatelessWidget {
                       ),
                       Text(
                         'Emitido el $date',
-                        style: TextStyle(
-                            color: Colors.grey, fontSize: 12.sp),
+                        style: TextStyle(color: Colors.grey, fontSize: 12.sp),
                       ),
                     ],
                   ),
                 ),
                 // Status Badge
                 Container(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 10.w, vertical: 4.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                   decoration: BoxDecoration(
                     color: isAccepted
                         ? Colors.green.withAlpha(30)
@@ -371,8 +382,7 @@ class _ProposalCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
-                          color:
-                              isAccepted ? Colors.green : Colors.orange,
+                          color: isAccepted ? Colors.green : Colors.orange,
                         ),
                       ),
                     ],
@@ -385,8 +395,7 @@ class _ProposalCard extends StatelessWidget {
               SizedBox(height: 10.h),
               Text(
                 proposal['title'] as String,
-                style:
-                    TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
               ),
             ],
 
@@ -410,17 +419,14 @@ class _ProposalCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (isReceived &&
-                    !isAccepted &&
-                    proposal['file_url'] != null)
+                if (isReceived && !isAccepted && proposal['file_url'] != null)
                   SizedBox(width: 8.w),
                 if (isReceived && !isAccepted)
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () =>
-                          onAccept(proposal['id'].toString()),
-                      icon: Icon(Icons.check_circle_outline_rounded,
-                          size: 16.r),
+                      onPressed: () => onAccept(proposal['id'].toString()),
+                      icon:
+                          Icon(Icons.check_circle_outline_rounded, size: 16.r),
                       label: const Text('Aceptar'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
@@ -440,277 +446,7 @@ class _ProposalCard extends StatelessWidget {
   }
 }
 
-// ─── Create Proposal Sheet ──────────────────────────────────────────────────
-
-class _CreateProposalSheet extends ConsumerStatefulWidget {
-  const _CreateProposalSheet();
-
-  @override
-  ConsumerState<_CreateProposalSheet> createState() =>
-      _CreateProposalSheetState();
-}
-
-class _CreateProposalSheetState
-    extends ConsumerState<_CreateProposalSheet> {
-  final _titleCtrl = TextEditingController();
-  final _descCtrl = TextEditingController();
-  final _amountCtrl = TextEditingController();
-  File? _selectedFile;
-  String? _fileName;
-  bool _isLoading = false;
-
-  Future<void> _pickFile() async {
-    // Uses image_picker to allow picking an image as the proposal attachment
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(
-        source: ImageSource.gallery, imageQuality: 90);
-    if (picked != null) {
-      setState(() {
-        _selectedFile = File(picked.path);
-        _fileName = picked.name;
-      });
-    }
-  }
-
-  Future<void> _submit() async {
-    if (_titleCtrl.text.trim().isEmpty) return;
-    setState(() => _isLoading = true);
-    try {
-      String? fileUrl;
-      if (_selectedFile != null) {
-        final storageRepo = ref.read(storageRepositoryProvider);
-        final config = await storageRepo.getProposalsConfig();
-        final uploadUrl = config?['uploadUrl'] as String?;
-        if (uploadUrl != null) {
-          final uploadService = ref.read(uploadServiceProvider);
-          await uploadService.uploadToPresignedUrl(
-              uploadUrl: uploadUrl, file: _selectedFile!);
-          fileUrl = config?['publicUrl'] as String?;
-        }
-      }
-
-      final repo = ref.read(professionalProposalsRepositoryProvider);
-      await repo.create({
-        'title': _titleCtrl.text.trim(),
-        'description': _descCtrl.text.trim(),
-        'amount': double.tryParse(_amountCtrl.text) ?? 0,
-        if (fileUrl != null) 'file_url': fileUrl,
-      });
-
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text('Presupuesto creado exitosamente'),
-              backgroundColor: Colors.green),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Error: $e'), backgroundColor: Colors.red),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  @override
-  void dispose() {
-    _titleCtrl.dispose();
-    _descCtrl.dispose();
-    _amountCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Container(
-      padding: EdgeInsets.only(
-        left: 20.w,
-        right: 20.w,
-        top: 20.h,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 30.h,
-      ),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white24 : Colors.black12,
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              ),
-            ),
-            SizedBox(height: 20.h),
-            Text('Nuevo Presupuesto',
-                style: TextStyle(
-                    fontSize: 18.sp, fontWeight: FontWeight.bold)),
-            SizedBox(height: 6.h),
-            Text('GESTIÓN DOCUMENTAL',
-                style: TextStyle(
-                    fontSize: 10.sp,
-                    color: theme.colorScheme.secondary,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.2)),
-            SizedBox(height: 20.h),
-            _FormField(
-                controller: _titleCtrl,
-                label: 'Título del Proyecto',
-                hint: 'Ej: Instalación eléctrica completa'),
-            SizedBox(height: 12.h),
-            _FormField(
-                controller: _descCtrl,
-                label: 'Descripción',
-                hint: 'Detallá el trabajo a realizar...',
-                maxLines: 3),
-            SizedBox(height: 12.h),
-            _FormField(
-                controller: _amountCtrl,
-                label: 'Monto (\$)',
-                hint: '0.00',
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true)),
-            SizedBox(height: 16.h),
-
-            // File picker
-            GestureDetector(
-              onTap: _pickFile,
-              child: Container(
-                padding: EdgeInsets.all(14.r),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: isDark
-                        ? Colors.white24
-                        : Colors.black.withAlpha(30),
-                    style: BorderStyle.solid,
-                  ),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.attach_file_rounded,
-                        color: theme.colorScheme.primary, size: 20.r),
-                    SizedBox(width: 10.w),
-                    Expanded(
-                      child: Text(
-                        _fileName ?? 'Adjuntar archivo (PDF, DOC)',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: _fileName != null
-                              ? null
-                              : Colors.grey,
-                        ),
-                      ),
-                    ),
-                    if (_fileName != null)
-                      Icon(Icons.check_circle_rounded,
-                          color: Colors.green, size: 18.r),
-                  ],
-                ),
-              ),
-            ),
-
-            SizedBox(height: 24.h),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r)),
-                ),
-                child: _isLoading
-                    ? SizedBox(
-                        height: 20.r,
-                        width: 20.r,
-                        child: const CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white),
-                      )
-                    : const Text('Crear Presupuesto'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 // ─── Shared Helpers ─────────────────────────────────────────────────────────
-
-class _FormField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String hint;
-  final int maxLines;
-  final TextInputType? keyboardType;
-
-  const _FormField({
-    required this.controller,
-    required this.label,
-    required this.hint,
-    this.maxLines = 1,
-    this.keyboardType,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white70 : Colors.black54)),
-        SizedBox(height: 6.h),
-        TextField(
-          controller: controller,
-          maxLines: maxLines,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey, fontSize: 13.sp),
-            filled: true,
-            fillColor: isDark
-                ? Colors.white.withAlpha(8)
-                : Colors.black.withAlpha(4),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
-              borderSide: BorderSide(
-                  color: isDark ? Colors.white10 : Colors.black.withAlpha(20)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10.r),
-              borderSide: BorderSide(
-                  color: isDark ? Colors.white10 : Colors.black.withAlpha(20)),
-            ),
-            contentPadding: EdgeInsets.symmetric(
-                horizontal: 14.w, vertical: 12.h),
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class _EmptyState extends StatelessWidget {
   final IconData icon;

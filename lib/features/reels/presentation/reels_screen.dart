@@ -6,6 +6,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../../../core/data/repositories/reels_repository.dart';
 import '../../../../core/data/repositories/provinces_repository.dart';
+import '../../../../core/widgets/app_dropdown.dart';
 
 class ReelsScreen extends ConsumerStatefulWidget {
   const ReelsScreen({super.key});
@@ -102,28 +103,26 @@ class _ReelsScreenState extends ConsumerState<ReelsScreen> {
                 Icon(Icons.map_rounded, color: theme.colorScheme.primary),
                 SizedBox(width: 12.w),
                 Expanded(
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      isExpanded: true,
-                      value: _selectedProvinceId,
-                      hint: const Text('Todas las provincias'),
-                      items: [
-                        const DropdownMenuItem<String>(
-                          value: null,
-                          child: Text('Todas las provincias'),
-                        ),
-                        ..._provinces.map((p) {
-                          return DropdownMenuItem<String>(
-                            value: p['id'].toString(),
-                            child: Text(p['name'] ?? 'Provincia'),
-                          );
-                        }),
-                      ],
-                      onChanged: (val) {
-                        setState(() => _selectedProvinceId = val);
-                        _loadReels();
-                      },
-                    ),
+                  child: AppDropdown<String?>(
+                    isExpanded: true,
+                    value: _selectedProvinceId,
+                    hint: 'Todas las provincias',
+                    items: [
+                      const AppDropdownItem<String?>(
+                        value: null,
+                        label: 'Todas las provincias',
+                      ),
+                      ..._provinces.map((p) {
+                        return AppDropdownItem<String?>(
+                          value: p['id'].toString(),
+                          label: p['name'] ?? 'Provincia',
+                        );
+                      }),
+                    ],
+                    onChanged: (val) {
+                      setState(() => _selectedProvinceId = val);
+                      _loadReels();
+                    },
                   ),
                 ),
               ],

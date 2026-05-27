@@ -42,8 +42,32 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> _saveSession(Map<String, dynamic> session) async {
     try {
-      await _storage.write(key: _storageKey, value: jsonEncode(session));
-    } catch (_) {}
+      // Normalize storage format: prefer `data.session` (Supabase style) or top-level `session`.
+      Map<String, dynamic> toSave = {};
+      try {
+        if (session['data'] is Map && session['data']['session'] is Map) {
+          toSave = Map<String, dynamic>.from(session['data']['session'] as Map);
+        } else if (session['session'] is Map) {
+          toSave = Map<String, dynamic>.from(session['session'] as Map);
+        } else {
+          toSave = Map<String, dynamic>.from(session);
+        }
+
+        // Log keys and a masked token sample for debugging (avoid printing full token)
+        final token = toSave['access_token'] ?? toSave['token'];
+        String masked = '***';
+        if (token is String && token.length > 8) {
+          masked =
+              '${token.substring(0, 4)}...${token.substring(token.length - 4)}';
+        }
+        debugPrint(
+            'AuthNotifier._saveSession: saving normalized keys: ${toSave.keys}, token sample: $masked');
+      } catch (_) {}
+
+      await _storage.write(key: _storageKey, value: jsonEncode(toSave));
+    } catch (e) {
+      debugPrint('AuthNotifier._saveSession error: $e');
+    }
   }
 
   Future<void> _clearSession() async {
@@ -76,6 +100,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
       debugPrint('AuthNotifier.login: usando _repo directamente');
       final resp = await _repo.login(email, password);
       debugPrint('AuthNotifier.login: _repo.login finalizado con exito');
+      try {
+        debugPrint('AuthNotifier.login: response keys: ${resp.keys}');
+      } catch (_) {}
       // save session
       await _saveSession(resp);
 

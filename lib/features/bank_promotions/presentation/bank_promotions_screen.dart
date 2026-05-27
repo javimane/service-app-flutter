@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import '../../../core/data/models/bank_promotions.model.dart';
 import '../../../core/data/providers/bank_promotions_provider.dart';
+import '../../../core/widgets/app_dropdown.dart';
 
 class BankPromotionsScreen extends ConsumerStatefulWidget {
   const BankPromotionsScreen({super.key});
@@ -38,15 +39,14 @@ class _BankPromotionsScreenState extends ConsumerState<BankPromotionsScreen> {
                     ),
                   ),
                   SizedBox(width: 8.w),
-                  DropdownButton<String>(
+                  AppDropdown<String>(
                     value: stateFilter,
                     items: const [
-                      DropdownMenuItem(value: 'all', child: Text('Todos')),
-                      DropdownMenuItem(value: 'active', child: Text('Activos')),
-                      DropdownMenuItem(
-                          value: 'inactive', child: Text('Inactivos')),
+                      AppDropdownItem(value: 'all', label: 'Todos'),
+                      AppDropdownItem(value: 'active', label: 'Activos'),
+                      AppDropdownItem(value: 'inactive', label: 'Inactivos'),
                     ],
-                    onChanged: (v) => setState(() => stateFilter = v ?? 'all'),
+                    onChanged: (v) => setState(() => stateFilter = v),
                   ),
                 ],
               ),

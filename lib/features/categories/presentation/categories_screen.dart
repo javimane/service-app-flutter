@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import '../providers/categories_providers.dart';
 import '../../../core/data/models/professional_model.dart';
+import '../../../core/widgets/app_dropdown.dart';
 
 class CategoriesScreen extends ConsumerStatefulWidget {
   const CategoriesScreen({super.key});
@@ -397,96 +398,72 @@ class _CategoriesScreenState extends ConsumerState<CategoriesScreen> {
   Widget _buildCategoryDropdown(
       WidgetRef ref, CategoriesFilterState filterState, bool isDark) {
     final categoriesAsync = ref.watch(categoriesListProvider);
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
-      decoration: BoxDecoration(
-          color: isDark ? Colors.grey[800] : Colors.grey[100],
-          borderRadius: BorderRadius.circular(8.r)),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int?>(
-          isExpanded: true,
-          value: filterState.categoryId,
-          hint: const Text('Profesiones y Oficios'),
-          items: [
-            const DropdownMenuItem(value: null, child: Text('Todas')),
-            if (categoriesAsync.value != null)
-              ...categoriesAsync.value!.map(
-                  (c) => DropdownMenuItem(value: c.id, child: Text(c.name))),
-          ],
-          onChanged: (val) {
-            ref.read(categoriesFilterProvider.notifier).state =
-                filterState.copyWith(
-              categoryId: val,
-              clearCategory: val == null,
-            );
-          },
-        ),
-      ),
+    return AppDropdown<int?>(
+      isExpanded: true,
+      value: filterState.categoryId,
+      hint: 'Profesiones y Oficios',
+      items: [
+        const AppDropdownItem<int?>(value: null, label: 'Todas'),
+        if (categoriesAsync.value != null)
+          ...categoriesAsync.value!.map(
+              (c) => AppDropdownItem<int?>(value: c.id, label: c.name)),
+      ],
+      onChanged: (val) {
+        ref.read(categoriesFilterProvider.notifier).state =
+            filterState.copyWith(
+          categoryId: val,
+          clearCategory: val == null,
+        );
+      },
     );
   }
 
   Widget _buildProvinceDropdown(
       WidgetRef ref, CategoriesFilterState filterState, bool isDark) {
     final provincesAsync = ref.watch(categoriesProvincesProvider);
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
-      decoration: BoxDecoration(
-          color: isDark ? Colors.grey[800] : Colors.grey[100],
-          borderRadius: BorderRadius.circular(8.r)),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int?>(
-          isExpanded: true,
-          value: filterState.provinceId,
-          hint: const Text('Provincia'),
-          items: [
-            const DropdownMenuItem(value: null, child: Text('Todas')),
-            if (provincesAsync.value != null)
-              ...provincesAsync.value!.map(
-                  (p) => DropdownMenuItem(value: p.id, child: Text(p.name))),
-          ],
-          onChanged: (val) {
-            ref.read(categoriesFilterProvider.notifier).state =
-                filterState.copyWith(
-              provinceId: val,
-              clearProvince: val == null,
-              clearDepartment: true,
-            );
-          },
-        ),
-      ),
+    return AppDropdown<int?>(
+      isExpanded: true,
+      value: filterState.provinceId,
+      hint: 'Provincia',
+      items: [
+        const AppDropdownItem<int?>(value: null, label: 'Todas'),
+        if (provincesAsync.value != null)
+          ...provincesAsync.value!.map(
+              (p) => AppDropdownItem<int?>(value: p.id, label: p.name)),
+      ],
+      onChanged: (val) {
+        ref.read(categoriesFilterProvider.notifier).state =
+            filterState.copyWith(
+          provinceId: val,
+          clearProvince: val == null,
+          clearDepartment: true,
+        );
+      },
     );
   }
 
   Widget _buildDepartmentDropdown(
       WidgetRef ref, CategoriesFilterState filterState, bool isDark) {
     final deptsAsync = ref.watch(categoriesDepartmentsProvider);
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
-      decoration: BoxDecoration(
-          color: isDark ? Colors.grey[800] : Colors.grey[100],
-          borderRadius: BorderRadius.circular(8.r)),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<int?>(
-          isExpanded: true,
-          value: filterState.departmentId,
-          hint: const Text('Ciudad'),
-          items: [
-            const DropdownMenuItem(value: null, child: Text('Todas')),
-            if (deptsAsync.value != null)
-              ...deptsAsync.value!.map(
-                  (d) => DropdownMenuItem(value: d.id, child: Text(d.name))),
-          ],
-          onChanged: filterState.provinceId == null
-              ? null
-              : (val) {
-                  ref.read(categoriesFilterProvider.notifier).state =
-                      filterState.copyWith(
-                    departmentId: val,
-                    clearDepartment: val == null,
-                  );
-                },
-        ),
-      ),
+    return AppDropdown<int?>(
+      isExpanded: true,
+      value: filterState.departmentId,
+      hint: 'Ciudad',
+      items: [
+        const AppDropdownItem<int?>(value: null, label: 'Todas'),
+        if (deptsAsync.value != null)
+          ...deptsAsync.value!.map(
+              (d) => AppDropdownItem<int?>(value: d.id, label: d.name)),
+      ],
+      onChanged: filterState.provinceId == null
+          ? (v) {}
+          : (val) {
+              ref.read(categoriesFilterProvider.notifier).state =
+                  filterState.copyWith(
+                departmentId: val,
+                clearDepartment: val == null,
+              );
+            },
     );
   }
 

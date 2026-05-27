@@ -99,10 +99,8 @@ final appRouter = GoRouter(
           pageBuilder: (context, state) =>
               _fadeTransition(state, const MenuScreen()),
         ),
-      ],
-    ),
 
-    // ─── Sub-routes (Pushed over root navigator, NavBar hidden) ───────────
+        // ─── Sub-routes (Inside ShellRoute so NavBar is visible everywhere) ───────────
     GoRoute(
       path: '/services',
       pageBuilder: (context, state) {
@@ -272,6 +270,8 @@ final appRouter = GoRouter(
       path: '/dashboard/bank-promotions',
       pageBuilder: (context, state) =>
           _slideTransition(state, const PlanGuard(allowedPlans: ['standard', 'premium'], child: DashboardBankPromotionsScreen())),
+    ),
+      ],
     ),
   ],
 );

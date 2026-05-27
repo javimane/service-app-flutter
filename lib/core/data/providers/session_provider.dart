@@ -10,6 +10,8 @@ class SessionInfo {
   final bool hasProfessionalSubscription;
   final String? plan; // e.g., 'free', 'standard', 'premium'
   final bool isActive; // overall session active flag
+  final String? userId;
+  final int? professionalId;
 
   const SessionInfo({
     required this.name,
@@ -18,6 +20,8 @@ class SessionInfo {
     required this.hasProfessionalSubscription,
     this.plan,
     required this.isActive,
+    this.userId,
+    this.professionalId,
   });
 }
 
@@ -64,5 +68,7 @@ final sessionInfoProvider = Provider<SessionInfo>((ref) {
     hasProfessionalSubscription: hasProfessionalSubscription,
     plan: plan,
     isActive: isActive,
+    userId: user?['id'] as String?,
+    professionalId: professionalId,
   );
 });

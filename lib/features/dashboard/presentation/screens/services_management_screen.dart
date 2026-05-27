@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:service_app_flutter/core/data/repositories/services_repository.dart';
 import 'package:service_app_flutter/core/data/repositories/categories_repository.dart';
 import 'package:service_app_flutter/core/data/models/categories.model.dart';
+import 'package:service_app_flutter/core/widgets/app_dropdown.dart';
 
 // ─── Providers ─────────────────────────────────────────────────────────────
 
@@ -498,36 +499,19 @@ class _ServiceFormSheetState extends ConsumerState<_ServiceFormSheet> {
                     color: isDark ? Colors.white70 : Colors.black54)),
             SizedBox(height: 6.h),
             Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                    color: isDark
-                        ? Colors.white10
-                        : Colors.black.withAlpha(20)),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton<int>(
-                  isExpanded: true,
-                  value: _selectedCategoryId,
-                  hint: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w),
-                    child: Text('Seleccionar categoría',
-                        style:
-                            TextStyle(color: Colors.grey, fontSize: 13.sp)),
-                  ),
-                  items: categories
-                      .map((c) => DropdownMenuItem<int>(
-                            value: c.id,
-                            child: Padding(
-                              padding:
-                                  EdgeInsets.symmetric(horizontal: 12.w),
-                              child: Text(c.name),
-                            ),
-                          ))
-                      .toList(),
-                  onChanged: (v) =>
-                      setState(() => _selectedCategoryId = v),
-                ),
+              width: double.infinity,
+              child: AppDropdown<int?>(
+                isExpanded: true,
+                value: _selectedCategoryId,
+                hint: 'Seleccionar categoría',
+                items: categories
+                    .map((c) => AppDropdownItem<int?>(
+                          value: c.id,
+                          label: c.name,
+                        ))
+                    .toList(),
+                onChanged: (v) =>
+                    setState(() => _selectedCategoryId = v),
               ),
             ),
 
